@@ -1,33 +1,48 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
+using Android.Support.V7.Widget;
 using Android.Views;
-using Android.Widget;
 using WebSocket4Net;
+using Xamarin.Essentials;
 
 namespace TTT.Client
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        
+        public static float Height { get; set; }
+        public static float Width { get; set; }
+        public static float Density { get; set; }
+
         public View MainView { get; set; }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            var metrics = Resources.DisplayMetrics;
+            var width = metrics.WidthPixels;
+            var height = metrics.HeightPixels;
+            Density = metrics.Density;
+
             base.OnCreate(savedInstanceState);
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            Platform.Init(this, savedInstanceState);
+            var testview = new TestView(this, width, height);
+            //SetContentView(testview);
             SetContentView(Resource.Layout.activity_main);
-            
-            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+
+            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
+
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -48,18 +63,17 @@ namespace TTT.Client
         }
 
         WebSocket _clientSocket;
-        public WebSocket ClientSocket {
+        public WebSocket ClientSocket 
+        {
             get
             {
                 return _clientSocket ?? (_clientSocket = openWebSocket());
             } 
-
         }
 
         private WebSocket openWebSocket()
         {
             var webSocketClient = new WebSocket("ws://192.168.0.15:69/");
-            //webSocketClient.AllowUnstrustedCertificate = true;
             webSocketClient.Opened += new EventHandler(webSocketClient_Opened);
             webSocketClient.Closed += new EventHandler(webSocketClient_Closed);
             webSocketClient.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
@@ -70,22 +84,15 @@ namespace TTT.Client
         private void FabOnClick(object sender, EventArgs eventArgs)
         {
             MainView = (View)sender;
-            Test();
-            //using (var ws = new WebSocket("ws://192.168.0.15:69/"))
-            //{
-            //    //ws.MessageReceived += Ws_MessageReceived;
-            //    //ws.Closed += Ws_Closed;
-            //    ws.Open();
-               
-            //    ws.Send("Hello");
-            //    //Console.ReadKey(true);
-            //}
+
+            //Test();
+            Test2();
             Snackbar.Make(MainView, "Socket Opened", Snackbar.LengthLong)
-                .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+                .SetAction("Action", (View.IOnClickListener)null).Show();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -99,8 +106,6 @@ namespace TTT.Client
                //Assert.Fail("Failed to Opened session ontime");
             }
 
-            //Assert.AreEqual(WebSocketState.Open, webSocketClient.State);
-
             for (var i = 0; i < 10; i++)
             {
                 var message = Guid.NewGuid().ToString();
@@ -112,23 +117,29 @@ namespace TTT.Client
                     //Assert.Fail("Failed to get echo messsage on time");
                     break;
                 }
-
-                //Assert.AreEqual(m_CurrentMessage, message);
             }
-
-            //webSocketClient.Close();
-
-            //if (!m_CloseEvent.WaitOne(5000))
-            //{
-            //    //Assert.Fail("Failed to close session ontime");
-            //}
-
-            //Assert.AreEqual(WebSocketState.Closed, webSocketClient.State);
         }
+
+        public void Test2()
+        {
+            var Client = new UdpClient();
+            var RequestData = Encoding.ASCII.GetBytes("SomeRequestData");
+            var ServerEp = new IPEndPoint(IPAddress.Any, 0);
+
+            Client.EnableBroadcast = true;
+            Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Broadcast, 8888));
+
+            var ServerResponseData = Client.Receive(ref ServerEp);
+            var ServerResponse = Encoding.ASCII.GetString(ServerResponseData);
+            Console.WriteLine("Recived {0} from {1}", ServerResponse, ServerEp.Address.ToString());
+
+            Client.Close();
+        }
+
         protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
-        protected string m_CurrentMessage = string.Empty;
+        
 
         protected void webSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
