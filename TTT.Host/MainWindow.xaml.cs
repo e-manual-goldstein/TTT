@@ -24,6 +24,12 @@ namespace TTT.Host
         public MainWindow()
         {
             InitializeComponent();
+            var broadcaster = new Broadcaster();
+            
+        }
+
+        public void CreateSocketHub()
+        {
             var socketHub = new SocketHub();
             while (true)
             {
@@ -38,7 +44,6 @@ namespace TTT.Host
 
                 }
             }
-            
         }
     }
 }
