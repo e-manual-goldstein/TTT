@@ -7,5 +7,8 @@
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
-
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+  </PropertyGroup>
 </Project>
