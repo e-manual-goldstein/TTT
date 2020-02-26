@@ -10,6 +10,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
+using Android.Widget;
 using WebSocket4Net;
 using Xamarin.Essentials;
 
@@ -18,30 +19,52 @@ namespace TTT.Client
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        public static float Height { get; set; }
-        public static float Width { get; set; }
-        public static float Density { get; set; }
-
+        int _width;
+        int _height;
         public View MainView { get; set; }
-
+        public static GameGrid _game;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             var metrics = Resources.DisplayMetrics;
-            var width = metrics.WidthPixels;
-            var height = metrics.HeightPixels;
-            Density = metrics.Density;
+            _width = metrics.WidthPixels;
+            _height = metrics.HeightPixels;
+
 
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-            var testview = new TestView(this, width, height);
-            //SetContentView(testview);
-            SetContentView(Resource.Layout.activity_main);
 
-            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
+            _game = GetGame();
+            _game.FrameLayout = new FrameLayout(this);
+            // testGrid.CreateCells();
+            _game.DrawCells();
+            ReloadView(_game.FrameLayout);
+
+
+            //var testview = new TestLayout(this, OnClick);
+            //testview.DrawButton();
+            //SetContentView(testview);
+            //SetContentView(Resource.Layout.activity_main);
+            //MainView = testview;
+            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+            //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            //fab.Click += FabOnClick;
+
+        }
+
+        private void ReloadView(FrameLayout frameLayout)
+        {
+            SetContentView(frameLayout);
+        }
+
+        public GameGrid GetGame()
+        {
+            if (_game != null)
+            {
+                return _game;
+            }
+            return new GameGrid(this, _width, _height);
 
         }
 
@@ -81,12 +104,12 @@ namespace TTT.Client
             return webSocketClient;
         }
 
-        private void FabOnClick(object sender, EventArgs eventArgs)
+        private void OnClick(object sender, EventArgs eventArgs)
         {
-            MainView = (View)sender;
+            
 
             //Test();
-            Test2();
+            //Test2();
             Snackbar.Make(MainView, "Socket Opened", Snackbar.LengthLong)
                 .SetAction("Action", (View.IOnClickListener)null).Show();
         }

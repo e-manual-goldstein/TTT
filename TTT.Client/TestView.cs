@@ -19,9 +19,13 @@ namespace TTT.Client
     {
         private float _width;
         private float _height;
+        Context _context;
 
         public TestView(Context context)
-            : base(context) { }
+            : base(context) 
+        {
+            _context = context;
+        }
 
         public TestView(Context context, float width, float height) : this(context)
         {
@@ -53,5 +57,6 @@ namespace TTT.Client
             var bottom = top + side;
             canvas.DrawRect(left, top, right, bottom, paint);
         }
+
     }
 }
