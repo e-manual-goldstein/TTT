@@ -36,7 +36,7 @@ namespace TTT.Client
             _game = GetGame();
             _game.FrameLayout = new FrameLayout(this);
             // testGrid.CreateCells();
-            _game.DrawCells();
+            _game.DrawCells_Func();
             ReloadView(_game.FrameLayout);
 
 
@@ -64,8 +64,8 @@ namespace TTT.Client
             {
                 return _game;
             }
-            return new GameGrid(this, _width, _height);
-
+            //return new GameGrid(this, _width, _height);
+            return new GameGrid(this, () => Resources.DisplayMetrics.WidthPixels, () => Resources.DisplayMetrics.HeightPixels);
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

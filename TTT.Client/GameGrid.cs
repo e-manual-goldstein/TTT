@@ -19,7 +19,8 @@ namespace TTT.Client
         Cell[] _allCells;
         float _screenWidth;
         float _screenHeight;
-       
+        Func<float> _widthFunc;
+        Func<float> _heightFunc;
 
         public GameGrid(Context context, float screenWidth, float screenHeight)
         {
@@ -30,6 +31,16 @@ namespace TTT.Client
             _allCells = CreateCells();
 
         }
+
+        public GameGrid(Context context, Func<float> widthFunc, Func<float> heightFunc)
+        {
+            _context = context;
+            _widthFunc = widthFunc;
+            _heightFunc = heightFunc;
+
+            _allCells = CreateCells();
+        }
+
         public FrameLayout FrameLayout { get; set; }
 
         public Cell[] CreateCells()
@@ -51,6 +62,28 @@ namespace TTT.Client
             var baseLayout = new FrameLayout.LayoutParams(Cell.Size, Cell.Size);
             var baseX = (_screenWidth - (3 * Cell.Size)) / 2;
             var baseY = (_screenHeight - (3 * Cell.Size)) / 2;
+            foreach (var cell in _allCells)
+            {
+                var button = new Button(_context);
+                button.LayoutParameters = baseLayout;
+                var x = baseX + (cell.I * Cell.Size);
+                var y = baseY + (cell.J * Cell.Size);
+                button.SetX(x);
+                button.SetY(y);
+                button.SetBackgroundColor(Color.Gray);
+                button.SetTextColor(Color.White);
+                button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
+                button.Text = cell.Value.ToString();
+                button.Click += cell.ClickCell;
+                FrameLayout.AddView(button);
+            }
+        }
+
+        public void DrawCells_Func()
+        {
+            var baseLayout = new FrameLayout.LayoutParams(Cell.Size, Cell.Size);
+            var baseX = (_widthFunc() - (3 * Cell.Size)) / 2;
+            var baseY = (_heightFunc() - (3 * Cell.Size)) / 2;
             foreach (var cell in _allCells)
             {
                 var button = new Button(_context);
