@@ -11,7 +11,7 @@ namespace TTT.Host
     {
         UdpClient _server;
         bool _awaitingConnections;
-        
+        static int _messageCount;
 
         public Broadcaster()
         {
@@ -30,8 +30,8 @@ namespace TTT.Host
 
                     //await connection
                     var clientRequestData = _server.Receive(ref targetEndPoint);
-
-                    Console.WriteLine(Encoding.ASCII.GetString(clientRequestData));
+                    
+                    Print("clientRequestData: " + Encoding.ASCII.GetString(clientRequestData));
                     
                     //process response
                     if (Guid.TryParse(Encoding.ASCII.GetString(clientRequestData), out Guid id))
@@ -47,9 +47,9 @@ namespace TTT.Host
 
         public IPAddress BeginHandshake(Guid clientId, IPEndPoint targetEndPoint)
         {
-            Console.WriteLine(clientId);
+            Print("clientId: " + clientId);
 
-            Console.WriteLine(targetEndPoint.Address);
+            Print("targetEndPoint.Address: " + targetEndPoint.Address);
 
             //prepare data
             var data = Encoding.ASCII.GetBytes(clientId.ToString());
@@ -59,13 +59,19 @@ namespace TTT.Host
 
             //await address confirmation
             var response = _server.Receive(ref targetEndPoint);
-            Console.WriteLine(Encoding.ASCII.GetString(response));
+            Print("response: " + Encoding.ASCII.GetString(response));
             while (response != null)
             {
-                Console.WriteLine(Encoding.ASCII.GetString(_server.Receive(ref targetEndPoint)));
+                response = _server.Receive(ref targetEndPoint);
+                Print("response: " + Encoding.ASCII.GetString(response));
             }
 
             return IPAddress.TryParse(Encoding.ASCII.GetString(response), out IPAddress serverIp) ? serverIp : null;
+        }
+
+        public void Print(object message)
+        {
+            Console.WriteLine($"{_messageCount++}: {message}");
         }
     }
 }

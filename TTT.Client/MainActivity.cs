@@ -3,7 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Android.App;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -52,12 +54,14 @@ namespace TTT.Client
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
 
-            _game = GetGame();
-            _game.FrameLayout = new FrameLayout(this);
-            
-            _game.DrawCells_Func();
-            ReloadView(_game.FrameLayout);
-            Receiver.Begin(ipAddress => LoadClientSocket(ipAddress));
+            //_game = GetGame();
+            //_game.FrameLayout = new FrameLayout(this);
+
+            //_game.DrawCells_Func();
+            //ReloadView(_game.FrameLayout);
+            AddTestButton(this);
+
+            //Receiver.Begin(ipAddress => LoadClientSocket(ipAddress));
 
             //var testview = new TestLayout(this, OnClick);
             //testview.DrawButton();
@@ -70,6 +74,30 @@ namespace TTT.Client
             //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             //fab.Click += FabOnClick;
 
+        }
+
+        private void AddTestButton(MainActivity mainActivity)
+        {
+            var baseLayout = new FrameLayout.LayoutParams(Cell.Size, Cell.Size);
+            var baseX = (_width - Cell.Size) / 2;
+            var baseY = (_height - Cell.Size) / 2;
+            var frameLayout = new FrameLayout(mainActivity);
+            var button = new Button(mainActivity);
+            button.LayoutParameters = baseLayout;
+            button.SetX(baseX);
+            button.SetY(baseY);
+            button.SetBackgroundColor(Color.Gray);
+            button.SetTextColor(Color.White);
+            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
+            button.Text = "TEST";
+            button.Click += TestButton;
+            frameLayout.AddView(button);
+            SetContentView(frameLayout);
+        }
+
+        internal void TestButton(object sender, EventArgs e)
+        {
+            Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress)));
         }
 
         private void ReloadView(FrameLayout frameLayout)
