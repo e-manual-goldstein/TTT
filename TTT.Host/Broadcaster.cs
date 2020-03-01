@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TTT.Common;
 
 namespace TTT.Host
 {
@@ -12,7 +13,7 @@ namespace TTT.Host
         UdpClient _server;
         bool _awaitingConnections;
         static int _messageCount;
-
+        Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
         public Broadcaster()
         {
             _awaitingConnections = true;
@@ -29,14 +30,15 @@ namespace TTT.Host
                     var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
                     //await connection
-                    var clientRequestData = _server.Receive(ref targetEndPoint);
-                    
-                    Print("clientRequestData: " + Encoding.ASCII.GetString(clientRequestData));
+                    var message = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
+
+                    //Print("clientRequestData: " + Encoding.ASCII.GetString(clientRequestData));
                     
                     //process response
-                    if (Guid.TryParse(Encoding.ASCII.GetString(clientRequestData), out Guid id))
+                    if (Guid.TryParse(message.Payload, out Guid id))
                     {
                         //begin handshake
+                        Print($"Beginning Handshake for {id}");
                         var serverIP = BeginHandshake(id, targetEndPoint);
                         if (serverIP != null)
                             connectClientAction(serverIP, id);
@@ -47,27 +49,41 @@ namespace TTT.Host
 
         public IPAddress BeginHandshake(Guid clientId, IPEndPoint targetEndPoint)
         {
-            Print("clientId: " + clientId);
-
-            Print("targetEndPoint.Address: " + targetEndPoint.Address);
-
             //prepare data
-            var data = Encoding.ASCII.GetBytes(clientId.ToString());
+            var data = new UdpMessage(clientId.ToString());
 
+            Print($"Sending confirmation of clientId: {clientId}");
             //send confirmation of clientId
-            _server.Send(data, data.Length, targetEndPoint);
+            _server.Send(data, targetEndPoint);
 
             //await address confirmation
-            var response = _server.Receive(ref targetEndPoint);
-            Print("response: " + Encoding.ASCII.GetString(response));
-            while (response != null)
-            {
-                response = _server.Receive(ref targetEndPoint);
-                Print("response: " + Encoding.ASCII.GetString(response));
-            }
+            var response = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
+            Print($"Received message: {response.Payload}");
+            //var message = HandleReceivedMessage(response);
+            //if (message == null)
+            //{
+            //    return null;
+            //}
 
-            return IPAddress.TryParse(Encoding.ASCII.GetString(response), out IPAddress serverIp) ? serverIp : null;
+            //while (response != null)
+            //{
+            //    response = _server.Receive(ref targetEndPoint);
+            //    Print("response: " + Encoding.ASCII.GetString(response));
+            //}
+
+            return IPAddress.TryParse(response.Payload, out IPAddress serverIp) ? serverIp : null;
         }
+
+        //private UdpMessage HandleReceivedMessage(byte[] messageData)
+        //{
+        //    var message = UdpMessage.FromByteArray(messageData);
+        //    if (_messages.ContainsKey(message.Id))
+        //        return null;
+        //    _messages[message.Id] = message.Payload;
+        //    return message;
+        //}
+
+        
 
         public void Print(object message)
         {

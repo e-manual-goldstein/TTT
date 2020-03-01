@@ -6,13 +6,24 @@ namespace TTT.Common
 {
     public class UdpMessage
     {
-        public Guid MessageId { get; set; }
+        public UdpMessage(string payload)
+        {
+            Id = Guid.NewGuid();
+            Payload = payload;
+        }
 
-        public string Message { get; set; }
+        public Guid Id { get; private set; }
+
+        public string Payload { get; private set; }
 
         public byte[] ToByteArray()
         {
             return Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(this));
+        }
+
+        public static UdpMessage FromByteArray(byte[] messageData)
+        {
+            return JsonConvert.DeserializeObject<UdpMessage>(Encoding.ASCII.GetString(messageData));
         }
     }
 }

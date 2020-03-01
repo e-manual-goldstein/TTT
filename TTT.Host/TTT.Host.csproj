@@ -11,4 +11,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TTT.Common\TTT.Common.csproj" />
+  </ItemGroup>
 </Project>

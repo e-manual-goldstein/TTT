@@ -11,6 +11,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using TTT.Common;
 
 namespace TTT.Client
 {
@@ -24,29 +25,27 @@ namespace TTT.Client
         UdpClient _client = new UdpClient();
         IPEndPoint _serverEndpoint = new IPEndPoint(IPAddress.Any, 0);
         Guid _clientId;
+        Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
+
 
         public void Begin(Action<IPAddress> createNewSocket)
         {
             //prepare request data
-            var requestData = Encoding.ASCII.GetBytes(_clientId.ToString());
+            var request = new UdpMessage(_clientId.ToString());
             _client.EnableBroadcast = true;
 
             //send initial request data
-            _client.Send(requestData, requestData.Length, new IPEndPoint(IPAddress.Broadcast, 8888));
+            _client.Send(request, new IPEndPoint(IPAddress.Broadcast, 8888));
 
             //receive server socket address
-            var responseData = _client.Receive(ref _serverEndpoint);
+            var responseData = _client.ReceiveUnique(ref _serverEndpoint, ref _messages);
 
-            if (Guid.TryParse(Encoding.ASCII.GetString(responseData), out Guid id))
+            if (Guid.TryParse(responseData.Payload, out Guid id))
             {
                 if (id == _clientId)
                 {
-
-                    //prepare contract
-                    var contractData = Encoding.ASCII.GetBytes(_serverEndpoint.Address.ToString());
-        
                     //send contract
-                    _client.Send(contractData, contractData.Length, _serverEndpoint);
+                    _client.Send(new UdpMessage(_serverEndpoint.Address.ToString()), _serverEndpoint);
                     createNewSocket(_serverEndpoint.Address);
                     _client.Close();
                 }
