@@ -24,26 +24,16 @@ namespace TTT.Host
         public MainWindow()
         {
             InitializeComponent();
-            var broadcaster = new Broadcaster();
             
+            //x.Children.Add(new Button() { Height = 20, Width = 20 });
+            //var broadcaster = new Broadcaster();
+            GameGrid = new GameGrid(() => (float)Width,() => (float)Height);
+            GameGrid.DrawCells();
+            Content = GameGrid.Canvas;
         }
 
-        public void CreateSocketHub()
-        {
-            var socketHub = new SocketHub();
-            while (true)
-            {
-                try
-                {
-                    var guid = Guid.NewGuid();
-                    socketHub.RequestSocketConnection(guid);
-                    socketHub.OpenConnection(guid);
-                }
-                catch
-                {
+        public GameGrid GameGrid { get; set; }
 
-                }
-            }
-        }
+
     }
 }

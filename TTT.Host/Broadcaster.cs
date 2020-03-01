@@ -3,25 +3,69 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TTT.Host
 {
     public class Broadcaster
     {
+        UdpClient _server;
+        bool _awaitingConnections;
+        
+
         public Broadcaster()
         {
-            var server = new UdpClient(8888);
-            var responseData = Encoding.ASCII.GetBytes("SomeResponseData");
+            _awaitingConnections = true;
+            _server = new UdpClient(8888);
+        }
 
-            while (true)
+        public void BeginBroadcast(Action<IPAddress, Guid> connectClientAction)
+        {
+            Task.Run(() =>
             {
-                var clientEp = new IPEndPoint(IPAddress.Any, 0);
-                var clientRequestData = server.Receive(ref clientEp);
-                var clientRequest = Encoding.ASCII.GetString(clientRequestData);
+                while (_awaitingConnections)
+                {
+                    //prepare end point
+                    var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-                Console.WriteLine("Recived {0} from {1}, sending response", clientRequest, clientEp.Address.ToString());
-                server.Send(responseData, responseData.Length, clientEp);
+                    //await connection
+                    var clientRequestData = _server.Receive(ref targetEndPoint);
+
+                    Console.WriteLine(Encoding.ASCII.GetString(clientRequestData));
+                    
+                    //process response
+                    if (Guid.TryParse(Encoding.ASCII.GetString(clientRequestData), out Guid id))
+                    {
+                        //begin handshake
+                        var serverIP = BeginHandshake(id, targetEndPoint);
+                        if (serverIP != null)
+                            connectClientAction(serverIP, id);
+                    }
+                }
+            });
+        }
+
+        public IPAddress BeginHandshake(Guid clientId, IPEndPoint targetEndPoint)
+        {
+            Console.WriteLine(clientId);
+
+            Console.WriteLine(targetEndPoint.Address);
+
+            //prepare data
+            var data = Encoding.ASCII.GetBytes(clientId.ToString());
+
+            //send confirmation of clientId
+            _server.Send(data, data.Length, targetEndPoint);
+
+            //await address confirmation
+            var response = _server.Receive(ref targetEndPoint);
+            Console.WriteLine(Encoding.ASCII.GetString(response));
+            while (response != null)
+            {
+                Console.WriteLine(Encoding.ASCII.GetString(_server.Receive(ref targetEndPoint)));
             }
+
+            return IPAddress.TryParse(Encoding.ASCII.GetString(response), out IPAddress serverIp) ? serverIp : null;
         }
     }
 }

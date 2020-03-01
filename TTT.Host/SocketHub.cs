@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.IO;
+using TTT.Host;
 
 namespace TTT.Core
 {
@@ -15,32 +16,40 @@ namespace TTT.Core
     {
         const string stdResponseGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         const int PORT_NO = 69;
-        const string SERVER_IP = "192.168.0.15";
-        public static int ClientId = 0;
 
         public SocketHub()
         {
+            _broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
+        }
+        
+        Broadcaster _broadcaster = new Broadcaster();
 
+        Dictionary<string, TcpListener> _serverDictionary = new Dictionary<string, TcpListener>();
+
+        public TcpListener GetServer(IPAddress ipAddress)
+        {
+            if (ipAddress != null)
+            {
+                return GetServer(ipAddress.ToString());
+            }
+            return null;
         }
 
-        private TcpListener _server = new TcpListener(IPAddress.Parse(SERVER_IP), PORT_NO);
-        public TcpListener Server 
+        public TcpListener GetServer(string ipAddress)
         {
-            get
+            if (_serverDictionary.ContainsKey(ipAddress))
             {
-                return _server;
+                return _serverDictionary[ipAddress];
             }
-            set
-            {
-                _server = value;
-            }
+            return _serverDictionary[ipAddress] = new TcpListener(IPAddress.Parse(ipAddress), PORT_NO);
         }
 
         IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
-        public Guid RequestSocketConnection(Guid id)
+        public Guid RequestSocketConnection(IPAddress ipAddress, Guid id)
         {
-            Server.Start();
+            var server = GetServer(ipAddress);
+            server.Start();
             if (_activeSockets.ContainsKey(id))
             {
                 Output.Debug("Found connection for same Id, disposing old connection");
@@ -48,7 +57,7 @@ namespace TTT.Core
             }
 
             _activeSockets[id] = new GameSocket();
-            _activeSockets[id].Client = Server.AcceptTcpClient();
+            _activeSockets[id].Client = server.AcceptTcpClient();
             return id;
         }
 
@@ -87,13 +96,13 @@ namespace TTT.Core
             }
         }
         
-        public void Broadcast(string str)
-        {
-            foreach (var entry in _activeSockets)
-            {
-                entry.Value.Send(str);
-            }
-        }
+        //public void Broadcast(string str)
+        //{
+        //    foreach (var entry in _activeSockets)
+        //    {
+        //        entry.Value.Send(str);
+        //    }
+        //}
 
         public void SendMessage(Guid userId, string message)
         {
@@ -140,7 +149,7 @@ namespace TTT.Core
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
                 Console.WriteLine("Received message: {0}", messageReceived);
-                Broadcast(messageReceived);
+                //Broadcast(messageReceived);
             }
             else
                 Console.WriteLine("mask bit not set");
