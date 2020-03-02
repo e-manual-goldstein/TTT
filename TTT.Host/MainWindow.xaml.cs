@@ -25,8 +25,6 @@ namespace TTT.Host
         {
             InitializeComponent();
             
-            //x.Children.Add(new Button() { Height = 20, Width = 20 });
-            //var broadcaster = new Broadcaster();
             GameGrid = new GameGrid(() => (float)Width,() => (float)Height);
             GameGrid.DrawCells();
             Content = GameGrid.Canvas;

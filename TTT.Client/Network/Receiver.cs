@@ -20,6 +20,7 @@ namespace TTT.Client
         public Receiver(Guid clientId)
         {
             _clientId = clientId;
+            _client.EnableBroadcast = true;
         }
 
         UdpClient _client = new UdpClient();
@@ -32,8 +33,7 @@ namespace TTT.Client
         {
             //prepare request data
             var request = new UdpMessage(_clientId.ToString());
-            _client.EnableBroadcast = true;
-
+            
             //send initial request data
             _client.Send(request, new IPEndPoint(IPAddress.Broadcast, 8888));
 

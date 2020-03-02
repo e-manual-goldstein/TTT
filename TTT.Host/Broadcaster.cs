@@ -29,10 +29,12 @@ namespace TTT.Host
                     //prepare end point
                     var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
+                    Print($"Listening to {targetEndPoint.Address}");
+
                     //await connection
                     var message = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
 
-                    //Print("clientRequestData: " + Encoding.ASCII.GetString(clientRequestData));
+                    Print($"Received message '{message.Payload}' from {targetEndPoint.Address}");
                     
                     //process response
                     if (Guid.TryParse(message.Payload, out Guid id))
@@ -40,6 +42,7 @@ namespace TTT.Host
                         //begin handshake
                         Print($"Beginning Handshake for {id}");
                         var serverIP = BeginHandshake(id, targetEndPoint);
+                        Print($"Handshake completed for {id}, serverIP is {serverIP}");
                         if (serverIP != null)
                             connectClientAction(serverIP, id);
                     }
@@ -55,7 +58,7 @@ namespace TTT.Host
             Print($"Sending confirmation of clientId: {clientId}");
             //send confirmation of clientId
             _server.Send(data, targetEndPoint);
-
+            
             //await address confirmation
             var response = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
             Print($"Received message: {response.Payload}");
@@ -70,7 +73,6 @@ namespace TTT.Host
             //    response = _server.Receive(ref targetEndPoint);
             //    Print("response: " + Encoding.ASCII.GetString(response));
             //}
-
             return IPAddress.TryParse(response.Payload, out IPAddress serverIp) ? serverIp : null;
         }
 
