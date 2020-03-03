@@ -19,12 +19,12 @@ namespace TTT.Core
 
         public SocketHub()
         {
-            _broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
+            //_broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
+
         }
         
-        Broadcaster _broadcaster = new Broadcaster();
-
         Dictionary<string, TcpListener> _serverDictionary = new Dictionary<string, TcpListener>();
+        
 
         public TcpListener GetServer(IPAddress ipAddress)
         {

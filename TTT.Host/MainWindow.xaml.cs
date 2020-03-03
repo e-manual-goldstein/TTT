@@ -28,10 +28,24 @@ namespace TTT.Host
             GameGrid = new GameGrid(() => (float)Width,() => (float)Height);
             GameGrid.DrawCells();
             Content = GameGrid.Canvas;
+            AddTestButton(GameGrid.Canvas);
+        }
+
+        private void AddTestButton(Canvas canvas)
+        {
+            var button = new Button();
+            button.Content = "Test";
+            button.Click += Button_Click;
+            canvas.Children.Add(button);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ButtonAction();
         }
 
         public GameGrid GameGrid { get; set; }
 
-
+        public static Action ButtonAction { get; set; }
     }
 }

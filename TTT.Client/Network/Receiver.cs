@@ -35,9 +35,9 @@ namespace TTT.Client
             var request = new UdpMessage(_clientId.ToString());
             
             //send initial request data
-            _client.Send(request, new IPEndPoint(IPAddress.Broadcast, 8888));
+            _client.Send(request, new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
 
-            //receive server socket address
+            //receive clientId Confirmation
             var responseData = _client.ReceiveUnique(ref _serverEndpoint, ref _messages);
 
             if (Guid.TryParse(responseData.Payload, out Guid id))
