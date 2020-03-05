@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.IO;
 using TTT.Host;
+using TTT.Common;
 
 namespace TTT.Core
 {
@@ -16,9 +17,10 @@ namespace TTT.Core
     {
         const string stdResponseGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         const int PORT_NO = 69;
-
-        public SocketHub()
+        Logger _logger;
+        public SocketHub(Logger logger)
         {
+            _logger = logger;
             //_broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
 
         }
@@ -41,6 +43,7 @@ namespace TTT.Core
             {
                 return _serverDictionary[ipAddress];
             }
+            _logger.Log($"Creating new server on {ipAddress}:{PORT_NO}");
             return _serverDictionary[ipAddress] = new TcpListener(IPAddress.Parse(ipAddress), PORT_NO);
         }
 
@@ -48,7 +51,9 @@ namespace TTT.Core
 
         public Guid RequestSocketConnection(IPAddress ipAddress, Guid id)
         {
+            _logger.Log($"Requesting socket connection");
             var server = GetServer(ipAddress);
+            _logger.Log($"Starting Server: {server.LocalEndpoint}");
             server.Start();
             if (_activeSockets.ContainsKey(id))
             {

@@ -20,13 +20,15 @@ namespace TTT.Host
     {
         public App()
         {
-            _socketHub = new SocketHub();
-            _listener = new Listener();
-            _broadcaster = new Broadcaster();
+            _logger = new Logger();
+            _socketHub = new SocketHub(_logger);
+            _listener = new Listener(_logger);
+            _broadcaster = new Broadcaster(_logger);
 
             Host.MainWindow.ButtonAction = () =>
             {
                 _listener.Start((msg, ep) => handleIncomingMessage(msg, ep));
+                //_socketHub.RequestSocketConnection(IPAddress.Parse("192.168.0.10"), Guid.NewGuid());
             };
 
         }
@@ -34,9 +36,13 @@ namespace TTT.Host
         private void handleIncomingMessage(UdpMessage message, IPEndPoint endPoint)
         {
             if (Guid.TryParse(message.Payload, out var id))
+            {
+                _logger.Log($"Begining Handshake for ID:{id}");
                 _broadcaster.BeginHandshake(id, endPoint, _socketHub);
+            }
         }
 
+        Logger _logger;
         Broadcaster _broadcaster;
 
         public Broadcaster Broadcaster

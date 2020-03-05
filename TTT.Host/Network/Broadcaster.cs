@@ -14,8 +14,10 @@ namespace TTT.Host
         bool _awaitingConnections;
         static int _messageCount;
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
-        public Broadcaster()
+        Logger _logger;
+        public Broadcaster(Logger logger)
         {
+            _logger = logger;
             _awaitingConnections = true;
         }
 
@@ -93,6 +95,9 @@ namespace TTT.Host
         public void BeginHandshake(Guid clientId, IPEndPoint targetEndPoint, SocketHub socketHub)
         {
             var server = new UdpClient();
+            _logger.Log($"Created new UdpCLient: {server.Client.LocalEndPoint}");
+
+            _logger.Log($"Sending message to {targetEndPoint.Address}:{targetEndPoint.Port}");
             server.Send(new UdpMessage(clientId.ToString()), targetEndPoint);
             
             //await connection
@@ -101,7 +106,9 @@ namespace TTT.Host
                 {
                     var result = await task;
                     var message = UdpMessage.FromByteArray(result.Buffer);
-                    socketHub.RequestSocketConnection(targetEndPoint.Address, clientId);
+                    _logger.Log($"Received message '{message.Payload}'");
+                    if (IPAddress.TryParse(message.Payload, out var address))
+                        socketHub.RequestSocketConnection(address, clientId);
                 });
 
         }

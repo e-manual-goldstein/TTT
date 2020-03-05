@@ -14,9 +14,11 @@ namespace TTT.Host
         UdpClient _server;
         bool _awaitingConnections;
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
+        Logger _logger;
 
-        public Listener()
+        public Listener(Logger logger)
         {
+            _logger = logger;
             _awaitingConnections = true;
             _server = new UdpClient(Constants.SERVER_LISTEN_PORT);
         }
@@ -25,6 +27,7 @@ namespace TTT.Host
         {
             Task.Run(() =>
             {
+                _logger.Log("Listening for connections");
                 while (_awaitingConnections)
                 {
                     //prepare end point
@@ -32,7 +35,7 @@ namespace TTT.Host
 
                     //await message
                     var message = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
-
+                    _logger.Log($"Received message; ID={message.Id}");
                     handleIncomingMessage(message, targetEndPoint);
                 }
             });
