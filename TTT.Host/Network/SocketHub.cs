@@ -57,20 +57,26 @@ namespace TTT.Core
             server.Start();
             if (_activeSockets.ContainsKey(id))
             {
-                Output.Debug("Found connection for same Id, disposing old connection");
+                _logger.Log("Found connection for same Id, disposing old connection");
                 _activeSockets[id].Kill();
             }
-
             _activeSockets[id] = new GameSocket();
+            _logger.Log($"Opening Socket for {id}");
             _activeSockets[id].Client = server.AcceptTcpClient();
+            _logger.Log($"Socket Connected");
             return id;
+        }
+
+        public async Task OpenConnectionAsync(Guid userId)
+        {
+            await Task.Run(() => OpenConnection(userId));
         }
 
         public void OpenConnection(Guid id)
         {
             var socket = _activeSockets[id];
             var tcpClient = socket.Client;
-            Output.Debug("Handshake started");
+            _logger.Log("Handshake started");
             while (true)
             {
                 while (socket.IsActive() && tcpClient.Available < 3)
@@ -120,11 +126,6 @@ namespace TTT.Core
                 _activeSockets[userId].Kill();
         }
 
-        public void OpenConnectionAsync(Guid userId)
-        {
-            Task.Run(() => OpenConnection(userId));
-        }
-
         private void handleIncomingMessage(byte[] bytes)
         {
             bool fin = (bytes[0] & 0b10000000) != 0,
@@ -142,22 +143,22 @@ namespace TTT.Core
             }
             else if (msglen == 127)
             {
-                Console.WriteLine("TODO: msglen == 127, needs qword to store msglen");
+                _logger.Log("TODO: msglen == 127, needs qword to store msglen");
                 // i don't really know the byte order, please edit this
                 // msglen = BitConverter.ToUInt64(new byte[] { bytes[5], bytes[4], bytes[3], bytes[2], bytes[9], bytes[8], bytes[7], bytes[6] }, 0);
                 // offset = 10;
             }
 
             if (msglen == 0)
-                Console.WriteLine("msglen == 0");
+                _logger.Log("msglen == 0");
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
-                Console.WriteLine("Received message: {0}", messageReceived);
+                _logger.Log($"Received message: {messageReceived}");
                 //Broadcast(messageReceived);
             }
             else
-                Console.WriteLine("mask bit not set");
+                _logger.Log("mask bit not set");
         }
 
         private string decodeMessage(byte[] bytes, int offset, int msglen)

@@ -108,7 +108,10 @@ namespace TTT.Host
                     var message = UdpMessage.FromByteArray(result.Buffer);
                     _logger.Log($"Received message '{message.Payload}'");
                     if (IPAddress.TryParse(message.Payload, out var address))
+                    {
                         socketHub.RequestSocketConnection(address, clientId);
+                        socketHub.OpenConnectionAsync(clientId);
+                    }
                 });
 
         }

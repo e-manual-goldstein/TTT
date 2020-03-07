@@ -97,7 +97,10 @@ namespace TTT.Client
 
         internal void TestButton(object sender, EventArgs e)
         {
-            Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress)));
+            if (_clientSocket == null)
+                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress)));
+            else
+                _clientSocket.WebSocket.Send("Still Connected");
         }
 
         private void ReloadView(FrameLayout frameLayout)
