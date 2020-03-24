@@ -28,6 +28,7 @@ namespace TTT.Client
         Guid _clientId;
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
 
+        public Guid DeviceId => _clientId;
 
         public void Begin(Action<IPAddress> createNewSocket, Action newConnectionCreated)
         {

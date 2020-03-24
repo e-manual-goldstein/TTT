@@ -26,10 +26,10 @@ namespace TTT.Client
         int _height;
         public View MainView { get; set; }
         static GameGrid _game;
+        
         Receiver _receiver = new Receiver(Guid.NewGuid());
         ClientSocket _clientSocket;
-        Guid _deviceId;
-
+        GameController _controller;
 
         public Receiver Receiver
         {
@@ -42,7 +42,8 @@ namespace TTT.Client
         void LoadClientSocket(IPAddress serverAddress)
         {
             _clientSocket = new ClientSocket(serverAddress);
-            _clientSocket.WebSocket.Send("Connected");
+            _clientSocket.Send("Connected");
+            _controller = new GameController(_receiver.DeviceId, _clientSocket);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -51,32 +52,21 @@ namespace TTT.Client
             _width = metrics.WidthPixels;
             _height = metrics.HeightPixels;
 
-
+            //OnSaveInstanceState(null);
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-
-            AddConnectButton(this);
-            //AddTestButton(this);
-            //AddGameGrid(this);
-
-        
+            if (!GameIsInProgress())
+                AddConnectButton(this);
+            else
+                AddGameGrid(this);        
 
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
         }
 
-        private void AddGameGrid(MainActivity mainActivity)
+        bool GameIsInProgress()
         {
-            _game = GetGame();
-            _game.FrameLayout = new FrameLayout(mainActivity);
-
-            _game.DrawCells_Func();
-            ReloadView(_game.FrameLayout);
-        }
-
-        private void AsyncAddGameGrid(MainActivity mainActivity)
-        {
-            RunOnUiThread(() => AddGameGrid(mainActivity));
+            return _game != null && _clientSocket != null && _clientSocket.IsOpen;
         }
 
         private void AddConnectButton(MainActivity mainActivity)
@@ -98,40 +88,26 @@ namespace TTT.Client
             SetContentView(frameLayout);
         }
 
+        private void AddGameGrid(MainActivity mainActivity)
+        {
+            _game = GetGame(_controller);
+            _game.FrameLayout = new FrameLayout(mainActivity);
+            
+            _game.DrawCells_Func();
+            ReloadView(_game.FrameLayout);
+        }
+
         internal void Connect(object sender, EventArgs e)
         {
-            //Task.Run(() => AsyncAddGameGrid(this));
             if (_clientSocket == null)
                 Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress), () => AsyncAddGameGrid(this)));
             else
-                _clientSocket.WebSocket.Send("Still Connected");
+                _clientSocket.Send("Still Connected");
         }
 
-        private void AddTestButton(MainActivity mainActivity)
+        private void AsyncAddGameGrid(MainActivity mainActivity)
         {
-            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-            var baseX = (_width - Constants.CellSizeClient) / 2;
-            var baseY = (_height - Constants.CellSizeClient) / 2;
-            var frameLayout = new FrameLayout(mainActivity);
-            var button = new Button(mainActivity);
-            button.LayoutParameters = baseLayout;
-            button.SetX(baseX);
-            button.SetY(baseY);
-            button.SetBackgroundColor(Color.Gray);
-            button.SetTextColor(Color.White);
-            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-            button.Text = "TEST";
-            button.Click += TestButton;
-            frameLayout.AddView(button);
-            SetContentView(frameLayout);
-        }
-
-        internal void TestButton(object sender, EventArgs e)
-        {
-            if (_clientSocket == null)
-                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress), null));
-            else
-                _clientSocket.WebSocket.Send("Still Connected");
+            RunOnUiThread(() => AddGameGrid(mainActivity));
         }
 
         private void ReloadView(FrameLayout frameLayout)
@@ -139,49 +115,15 @@ namespace TTT.Client
             SetContentView(frameLayout);
         }
 
-        public GameGrid GetGame()
+        public GameGrid GetGame(GameController _controller)
         {
             if (_game != null)
             {
                 return _game;
             }
             //return new GameGrid(this, _width, _height);
-            return new GameGrid(this, () => Resources.DisplayMetrics.WidthPixels, () => Resources.DisplayMetrics.HeightPixels);
+            return new GameGrid(this, _controller, () => Resources.DisplayMetrics.WidthPixels, () => Resources.DisplayMetrics.HeightPixels);
         }
-
-        public override bool OnCreateOptionsMenu(IMenu menu)
-        {
-            MenuInflater.Inflate(Resource.Menu.menu_main, menu);
-            return true;
-        }
-
-        public override bool OnOptionsItemSelected(IMenuItem item)
-        {
-            int id = item.ItemId;
-            if (id == Resource.Id.action_settings)
-            {
-                return true;
-            }
-
-            return base.OnOptionsItemSelected(item);
-        }
-
-        private void OnClick(object sender, EventArgs eventArgs)
-        {
-            
-
-            //Test();
-            //Test2();
-            Snackbar.Make(MainView, "Socket Opened", Snackbar.LengthLong)
-                .SetAction("Action", (View.IOnClickListener)null).Show();
-        }
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
     }
 }
 

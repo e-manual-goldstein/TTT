@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using TTT.Common;
 using WebSocket4Net;
 using Xamarin.Essentials;
 
@@ -11,10 +13,22 @@ namespace TTT.Client
     public class ClientSocket
     {
         IPAddress _serverAddress;
-
+        bool _isOpen;
         public ClientSocket(IPAddress serverAddress)
         {
             _serverAddress = serverAddress;
+        }
+
+        public bool IsOpen => _isOpen;
+
+        public void Send(IGameCommand command)
+        {
+            Send(JsonConvert.SerializeObject(command));
+        }
+
+        public void Send(string message)
+        {
+            WebSocket.Send(message);
         }
 
         protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
@@ -22,7 +36,7 @@ namespace TTT.Client
         protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
 
         WebSocket _webSocket;
-        public WebSocket WebSocket
+        WebSocket WebSocket
         {
             get
             {
@@ -72,12 +86,12 @@ namespace TTT.Client
 
         protected void webSocketClient_Closed(object sender, EventArgs e)
         {
-            m_CloseEvent.Set();
+            _isOpen = false;
         }
 
         protected void webSocketClient_Opened(object sender, EventArgs e)
         {
-            m_OpenedEvent.Set();
+            _isOpen = true;
         }
 
     }
