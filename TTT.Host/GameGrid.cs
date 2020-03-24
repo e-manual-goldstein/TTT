@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TTT.Common;
 
 namespace TTT.Core
 {
@@ -76,8 +77,8 @@ namespace TTT.Core
         public void DrawCells()
         {
             
-            var baseX = (_widthFunc() - (3 * Cell.Size)) / 2;
-            var baseY = (_heightFunc() - (3 * Cell.Size)) / 2;
+            var baseX = (_widthFunc() - (3 * Constants.CellSizeHost)) / 2;
+            var baseY = (_heightFunc() - (3 * Constants.CellSizeHost)) / 2;
 
             foreach (var cell in _allCells)
             {
@@ -89,13 +90,13 @@ namespace TTT.Core
         public Canvas DrawCell(Cell cell, float baseX, float baseY)
         {
             var cellCanvas = new Canvas();
-            cellCanvas.Width = Cell.Size;
-            cellCanvas.Height = Cell.Size;
-            Canvas.SetLeft(cellCanvas, baseX + (cell.I * Cell.Size));
-            Canvas.SetBottom(cellCanvas, baseY + (cell.J * Cell.Size));
+            cellCanvas.Width = Constants.CellSizeHost;
+            cellCanvas.Height = Constants.CellSizeHost;
+            Canvas.SetLeft(cellCanvas, baseX + (cell.I * Constants.CellSizeHost));
+            Canvas.SetBottom(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
             cellCanvas.Background = new SolidColorBrush(Colors.Gray);
-            cellCanvas.Children.Add(DrawTextBox(cell, Cell.Size));
-           return cellCanvas;
+            cellCanvas.Children.Add(DrawTextBox(cell, Constants.CellSizeHost));
+            return cellCanvas;
         }
 
         public TextBlock DrawTextBox(Cell cell, int size)

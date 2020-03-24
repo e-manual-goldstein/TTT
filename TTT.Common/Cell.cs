@@ -3,14 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-
-namespace TTT.Client
+namespace TTT.Common
 {
     public class Cell
     {
@@ -23,17 +16,16 @@ namespace TTT.Client
             J = j;
 
         }
-        public static int Size = 250;
         public Marker? Value { get; set; }
 
-        internal void ClickCell(object sender, EventArgs e)
+        public void ClickCell(object sender, EventArgs e)
         {
             if (Value == null)
             {
                 Value = Turn;
-                var button = (Button)sender;
-                button.Text = Turn.ToString();
-                SwapTurn();
+                //var button = (Button)sender;
+                //button.Text = Turn.ToString();
+                //SwapTurn();
             }
         }
 
@@ -41,6 +33,11 @@ namespace TTT.Client
         {
             return $"{I}, {J}";
         }
+
+        
+
+        public Action<string> UpdateValue { get; set; }
+
 
         public void SwapTurn()
         {

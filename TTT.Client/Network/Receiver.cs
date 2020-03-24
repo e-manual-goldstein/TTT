@@ -29,7 +29,7 @@ namespace TTT.Client
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
 
 
-        public void Begin(Action<IPAddress> createNewSocket)
+        public void Begin(Action<IPAddress> createNewSocket, Action newConnectionCreated)
         {
             //prepare request data
             var request = new UdpMessage(_clientId.ToString());
@@ -48,9 +48,9 @@ namespace TTT.Client
                     _client.Send(new UdpMessage(_serverEndpoint.Address.ToString()), _serverEndpoint);
                     createNewSocket(_serverEndpoint.Address);
                     _client.Close();
+                    newConnectionCreated();
                 }
             }
-
         }
     }
 }

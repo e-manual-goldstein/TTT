@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TTT.Core
+namespace TTT.Common
 {
     public enum Marker
     {

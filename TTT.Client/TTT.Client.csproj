@@ -60,10 +60,8 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cell.cs" />
     <Compile Include="GameGrid.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="Marker.cs" />
     <Compile Include="Network\ClientSocket.cs" />
     <Compile Include="Network\Receiver.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

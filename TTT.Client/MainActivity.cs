@@ -13,6 +13,7 @@ using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
+using TTT.Common;
 using WebSocket4Net;
 using Xamarin.Essentials;
 
@@ -54,33 +55,63 @@ namespace TTT.Client
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
 
-            //_game = GetGame();
-            //_game.FrameLayout = new FrameLayout(this);
+            AddConnectButton(this);
+            //AddTestButton(this);
+            //AddGameGrid(this);
 
-            //_game.DrawCells_Func();
-            //ReloadView(_game.FrameLayout);
-            AddTestButton(this);
+        
 
-            //Receiver.Begin(ipAddress => LoadClientSocket(ipAddress));
-
-            //var testview = new TestLayout(this, OnClick);
-            //testview.DrawButton();
-            //SetContentView(testview);
-            //SetContentView(Resource.Layout.activity_main);
-            //MainView = testview;
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
+        }
 
-            //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            //fab.Click += FabOnClick;
+        private void AddGameGrid(MainActivity mainActivity)
+        {
+            _game = GetGame();
+            _game.FrameLayout = new FrameLayout(mainActivity);
 
+            _game.DrawCells_Func();
+            ReloadView(_game.FrameLayout);
+        }
+
+        private void AsyncAddGameGrid(MainActivity mainActivity)
+        {
+            RunOnUiThread(() => AddGameGrid(mainActivity));
+        }
+
+        private void AddConnectButton(MainActivity mainActivity)
+        {
+            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
+            var baseX = (_width - Constants.CellSizeClient) / 2;
+            var baseY = (_height - Constants.CellSizeClient) / 2;
+            var frameLayout = new FrameLayout(mainActivity);
+            var button = new Button(mainActivity);
+            button.LayoutParameters = baseLayout;
+            button.SetX(baseX);
+            button.SetY(baseY);
+            button.SetBackgroundColor(Color.Gray);
+            button.SetTextColor(Color.White);
+            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
+            button.Text = "CONNECT";
+            button.Click += Connect;
+            frameLayout.AddView(button);
+            SetContentView(frameLayout);
+        }
+
+        internal void Connect(object sender, EventArgs e)
+        {
+            //Task.Run(() => AsyncAddGameGrid(this));
+            if (_clientSocket == null)
+                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress), () => AsyncAddGameGrid(this)));
+            else
+                _clientSocket.WebSocket.Send("Still Connected");
         }
 
         private void AddTestButton(MainActivity mainActivity)
         {
-            var baseLayout = new FrameLayout.LayoutParams(Cell.Size, Cell.Size);
-            var baseX = (_width - Cell.Size) / 2;
-            var baseY = (_height - Cell.Size) / 2;
+            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
+            var baseX = (_width - Constants.CellSizeClient) / 2;
+            var baseY = (_height - Constants.CellSizeClient) / 2;
             var frameLayout = new FrameLayout(mainActivity);
             var button = new Button(mainActivity);
             button.LayoutParameters = baseLayout;
@@ -98,7 +129,7 @@ namespace TTT.Client
         internal void TestButton(object sender, EventArgs e)
         {
             if (_clientSocket == null)
-                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress)));
+                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress), null));
             else
                 _clientSocket.WebSocket.Send("Still Connected");
         }
