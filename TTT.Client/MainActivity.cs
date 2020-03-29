@@ -28,7 +28,7 @@ namespace TTT.Client
         static GameGrid _game;
         
         Receiver _receiver = new Receiver(Guid.NewGuid());
-        ClientSocket _clientSocket;
+        static ClientSocket _clientSocket;
         GameController _controller;
 
         public Receiver Receiver

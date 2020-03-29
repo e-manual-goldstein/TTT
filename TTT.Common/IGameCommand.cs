@@ -6,5 +6,6 @@ namespace TTT.Common
 {
     public interface IGameCommand
     {
+        Type CommandType { get; }
     }
 }

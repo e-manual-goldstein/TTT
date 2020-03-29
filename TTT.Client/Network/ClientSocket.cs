@@ -76,8 +76,7 @@ namespace TTT.Client
                 }
             }
         }
-
-
+        
         protected void webSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             //Snackbar.Make(MainView, e.Message, Snackbar.LengthLong)
@@ -93,6 +92,5 @@ namespace TTT.Client
         {
             _isOpen = true;
         }
-
     }
 }

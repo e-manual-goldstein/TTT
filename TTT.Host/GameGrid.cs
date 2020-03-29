@@ -107,7 +107,7 @@ namespace TTT.Core
             textBlock.Background = new SolidColorBrush(Colors.White);
             Canvas.SetBottom(textBlock, 1);
             Canvas.SetLeft(textBlock, 1);
-            cell.UpdateValue = (newValue) => textBlock.Text = newValue;
+            cell.UpdateValue = (newValue) => textBlock.Text = newValue.ToString();
             return textBlock;
         }
     }   

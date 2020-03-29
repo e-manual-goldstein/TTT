@@ -9,7 +9,7 @@ namespace TTT.Common
     {
         public int I;
         public int J;
-        public static Marker Turn = Marker.X;
+        public static Marker Turn = Common.Marker.X;
 
         public Cell(int i, int j)
         {
@@ -17,13 +17,13 @@ namespace TTT.Common
             J = j;
         }
 
-        public Marker? Value { get; set; }
+        public Marker? Marker { get; set; }
 
         public void ClickCell(object sender, EventArgs e)
         {
-            if (Value == null)
+            if (Marker == null)
             {
-                Value = Turn;
+                Marker = Turn;
                 TakeTurnAction(this);
             }
         }
@@ -35,7 +35,7 @@ namespace TTT.Common
 
         
 
-        public Action<string> UpdateValue { internal get; set; }
+        public Action<Marker> UpdateValue { get; set; }
 
         public Action<Cell> TakeTurnAction { internal get; set; }
 
@@ -44,11 +44,11 @@ namespace TTT.Common
         {
             switch (Turn)
             {
-                case Marker.X:
-                    Turn = Marker.O;
+                case Common.Marker.X:
+                    Turn = Common.Marker.O;
                     break;
-                case Marker.O:
-                    Turn = Marker.X;
+                case Common.Marker.O:
+                    Turn = Common.Marker.X;
                     break;
                 default:
                     break;

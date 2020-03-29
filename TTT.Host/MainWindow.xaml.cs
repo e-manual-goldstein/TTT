@@ -44,7 +44,7 @@ namespace TTT.Host
             ButtonAction();
         }
 
-        public GameGrid GameGrid { get; set; }
+        public static GameGrid GameGrid { get; set; }
 
         public static Action ButtonAction { get; set; }
     }

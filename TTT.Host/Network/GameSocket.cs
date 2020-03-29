@@ -5,15 +5,20 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TTT.Common;
+using TTT.Host.Control;
 
 namespace TTT.Core
 {
     public class GameSocket
     {
         Logger _logger;
-        public GameSocket(Logger logger)
+        MessageHandler _messageHandler;
+        GameController _gameController;
+        public GameSocket(Logger logger, MessageHandler messageHandler, GameController gameController)
         {
             _logger = logger;
+            _messageHandler = messageHandler;
+            _gameController = gameController;
             KeepAlive = true;
         }
 
@@ -101,6 +106,10 @@ namespace TTT.Core
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
                 _logger.Log($"Received message: {messageReceived}");
+                if (_messageHandler.TryParse(messageReceived, out IGameCommand gameCommand))
+                {
+                    _gameController.ExecuteCommand(gameCommand);
+                }
                 //Broadcast(messageReceived);
             }
             else

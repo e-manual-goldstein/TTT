@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.IO;
 using TTT.Host;
 using TTT.Common;
+using TTT.Host.Control;
 
 namespace TTT.Core
 {
@@ -18,9 +19,14 @@ namespace TTT.Core
         const string stdResponseGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         const int PORT_NO = 69;
         Logger _logger;
-        public SocketHub(Logger logger)
+        MessageHandler _messageHandler;
+        GameController _gameController;
+
+        public SocketHub(Logger logger, MessageHandler messageHandler, GameController gameController)
         {
             _logger = logger;
+            _messageHandler = messageHandler;
+            _gameController = gameController;
             //_broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
 
         }
@@ -60,7 +66,7 @@ namespace TTT.Core
                 _logger.Log("Found connection for same Id, disposing old connection");
                 _activeSockets[id].Kill();
             }
-            _activeSockets[id] = new GameSocket(_logger);
+            _activeSockets[id] = new GameSocket(_logger,_messageHandler,_gameController);
             _logger.Log($"Opening Socket for {id}");
             _activeSockets[id].Client = server.AcceptTcpClient();
             _logger.Log($"Socket Connected");

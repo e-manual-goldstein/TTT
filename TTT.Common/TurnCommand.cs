@@ -15,5 +15,7 @@ namespace TTT.Common
         public Guid PlayerId { get; set; }
 
         public Cell Cell { get; set; }
+
+        public Type CommandType => GetType();
     }
 }

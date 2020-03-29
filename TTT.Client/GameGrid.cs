@@ -87,7 +87,7 @@ namespace TTT.Client
                 button.SetBackgroundColor(Color.Gray);
                 button.SetTextColor(Color.White);
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-                button.Text = cell.Value.ToString();
+                button.Text = cell.Marker.ToString();
                 button.Click += cell.ClickCell;
                 FrameLayout.AddView(button);
             }

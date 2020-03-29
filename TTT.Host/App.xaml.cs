@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using TTT.Common;
 using TTT.Core;
+using TTT.Host.Control;
 
 namespace TTT.Host
 {
@@ -21,16 +22,14 @@ namespace TTT.Host
         public App()
         {
             _logger = new Logger();
-            _socketHub = new SocketHub(_logger);
             _listener = new Listener(_logger);
             _broadcaster = new Broadcaster(_logger);
-
+            _socketHub = new SocketHub(_logger, new MessageHandler(), new GameController(Host.MainWindow.GameGrid));    
             Host.MainWindow.ButtonAction = () =>
             {
                 _listener.Start((msg, ep) => handleIncomingMessage(msg, ep));
                 //_socketHub.RequestSocketConnection(IPAddress.Parse("192.168.0.10"), Guid.NewGuid());
             };
-
         }
 
         private void handleIncomingMessage(UdpMessage message, IPEndPoint endPoint)
