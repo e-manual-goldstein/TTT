@@ -94,26 +94,27 @@ namespace TTT.Host
 
         public void BeginHandshake(Guid clientId, IPEndPoint targetEndPoint, SocketHub socketHub)
         {
-            var server = new UdpClient();
-            _logger.Log($"Created new UdpCLient: {server.Client.LocalEndPoint}");
+            using (var server = new UdpClient())
+            {
+                _logger.Log($"Created new UdpCLient: {server.Client.LocalEndPoint}");
 
-            _logger.Log($"Sending message to {targetEndPoint.Address}:{targetEndPoint.Port}");
-            server.Send(new UdpMessage(clientId.ToString()), targetEndPoint);
-            
-            //await connection
-            server.ReceiveAsync()
-                .ContinueWith(async (task) =>
-                {
-                    var result = await task;
-                    var message = UdpMessage.FromByteArray(result.Buffer);
-                    _logger.Log($"Received message '{message.Payload}'");
-                    if (IPAddress.TryParse(message.Payload, out var address))
+                _logger.Log($"Sending message to {targetEndPoint.Address}:{targetEndPoint.Port}");
+                server.Send(new UdpMessage(clientId.ToString()), targetEndPoint);
+
+                //await connection
+                server.ReceiveAsync()
+                    .ContinueWith(async (task) =>
                     {
-                        socketHub.RequestSocketConnection(address, clientId);
-                        socketHub.OpenConnectionAsync(clientId);
-                    }
-                });
-
+                        var result = await task;
+                        var message = UdpMessage.FromByteArray(result.Buffer);
+                        _logger.Log($"Received message '{message.Payload}'");
+                        if (IPAddress.TryParse(message.Payload, out var address))
+                        {
+                            socketHub.RequestSocketConnection(address, clientId);
+                            socketHub.OpenConnectionAsync(clientId);
+                        }
+                    });
+            }
         }
 
         //private UdpMessage HandleReceivedMessage(byte[] messageData)

@@ -11,7 +11,6 @@ namespace TTT.Host
 {
     public class Listener
     {
-        UdpClient _server;
         bool _awaitingConnections;
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
         Logger _logger;
@@ -20,7 +19,7 @@ namespace TTT.Host
         {
             _logger = logger;
             _awaitingConnections = true;
-            _server = new UdpClient(Constants.SERVER_LISTEN_PORT);
+
         }
 
         public void Start(Action<UdpMessage, IPEndPoint> handleIncomingMessage)
@@ -32,19 +31,44 @@ namespace TTT.Host
                 {
                     //prepare end point
                     var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
-                    //await message
-                    var message = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
-                    _logger.Log($"Received message; ID={message.Id}");
-                    handleIncomingMessage(message, targetEndPoint);
+                    using (var _server = new UdpClient(Constants.SERVER_LISTEN_PORT))
+                    {
+                        //await message
+                        var message = _server.ReceiveUnique(ref targetEndPoint, ref _messages);
+                        _logger.Log($"Received message; ID={message.Id}");
+                        handleIncomingMessage(message, targetEndPoint);
+                    }
                 }
             });
+        }
+
+        public async Task StartAsync(Action<UdpMessage, IPEndPoint> handleIncomingMessage)
+        {
+            _logger.Log("Listening for connections");
+            //prepare end point
+            var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            var _server = new UdpClient(Constants.SERVER_LISTEN_PORT);
+            
+            //await message
+            var messageTask = _server.ReceiveAsync();
+            await messageTask.ContinueWith(task =>
+            {
+                var message = ParseMessage(task.Result);
+                _logger.Log($"Received message; ID={message.Id}");
+                handleIncomingMessage(message, targetEndPoint);
+                _server.Dispose();
+            });
+            
+        }
+
+        public UdpMessage ParseMessage(UdpReceiveResult udpReceiveResult)
+        {
+            return null;
         }
 
         public void Stop()
         {
             _awaitingConnections = false;
-            _server.Close();
         }
     }
 }

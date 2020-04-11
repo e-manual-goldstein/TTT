@@ -27,9 +27,31 @@ namespace TTT.Host
             _socketHub = new SocketHub(_logger, new MessageHandler(), new GameController(Host.MainWindow.GameGrid));    
             Host.MainWindow.ButtonAction = () =>
             {
-                _listener.Start((msg, ep) => handleIncomingMessage(msg, ep));
+                GetMyIPAddress();
+                //await _listener.StartAsync((msg, ep) => handleIncomingMessage(msg, ep));
                 //_socketHub.RequestSocketConnection(IPAddress.Parse("192.168.0.10"), Guid.NewGuid());
             };
+        }
+
+        private void GetMyIPAddress()
+        {
+            using (var listener = new UdpClient(Constants.SERVER_LISTEN_PORT))
+            {
+                var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                //await message
+                Task.Run(() => GetMessage(listener, targetEndPoint));
+                using (var speaker = new UdpClient())
+                {
+                    var request = new UdpMessage("Hello");
+                    speaker.Send(request, new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                }
+            }
+        }
+
+        private void GetMessage(UdpClient listener, IPEndPoint targetEndPoint)
+        {
+            var message = listener.Receive(ref targetEndPoint);
+            Console.WriteLine(UdpMessage.FromByteArray(message));
         }
 
         private void handleIncomingMessage(UdpMessage message, IPEndPoint endPoint)

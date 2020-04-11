@@ -17,13 +17,13 @@ namespace TTT.Client
 {
     public class Receiver
     {
-        public Receiver(Guid clientId)
+        public Receiver(Guid clientId, Logger logger)
         {
             _clientId = clientId;
-            _client.EnableBroadcast = true;
+            _logger = logger;
         }
 
-        UdpClient _client = new UdpClient();
+        Logger _logger;
         IPEndPoint _serverEndpoint = new IPEndPoint(IPAddress.Any, 0);
         Guid _clientId;
         Dictionary<Guid, string> _messages = new Dictionary<Guid, string>();
@@ -32,24 +32,32 @@ namespace TTT.Client
 
         public void Begin(Action<IPAddress> createNewSocket, Action newConnectionCreated)
         {
+            _logger.Log("Preparing request data");
             //prepare request data
             var request = new UdpMessage(_clientId.ToString());
-            
-            //send initial request data
-            _client.Send(request, new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
 
-            //receive clientId Confirmation
-            var responseData = _client.ReceiveUnique(ref _serverEndpoint, ref _messages);
-
-            if (Guid.TryParse(responseData.Payload, out Guid id))
+            _logger.Log($"Sending request data to {IPAddress.Broadcast}:{Constants.SERVER_LISTEN_PORT}");
+            using (var _client = new UdpClient() { EnableBroadcast = true })
             {
-                if (id == _clientId)
+                //send initial request data
+                _client.Send(request, new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+
+                _logger.Log($"Awaiting message on {_client.Client.LocalEndPoint}");
+                //receive clientId Confirmation
+                var responseData = _client.ReceiveUnique(ref _serverEndpoint, ref _messages);
+
+                _logger.Log($"Message received {responseData.Id}");
+
+                if (Guid.TryParse(responseData.Payload, out Guid id))
                 {
-                    //send contract
-                    _client.Send(new UdpMessage(_serverEndpoint.Address.ToString()), _serverEndpoint);
-                    createNewSocket(_serverEndpoint.Address);
-                    _client.Close();
-                    newConnectionCreated();
+                    if (id == _clientId)
+                    {
+                        //send contract 
+                        _client.Send(new UdpMessage(_serverEndpoint.Address.ToString()), _serverEndpoint);
+                        createNewSocket(_serverEndpoint.Address);
+                        _client.Close();
+                        newConnectionCreated();
+                    }
                 }
             }
         }

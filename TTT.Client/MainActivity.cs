@@ -24,10 +24,11 @@ namespace TTT.Client
     {
         int _width;
         int _height;
+        private Logger _logger = new Logger();
         public View MainView { get; set; }
         static GameGrid _game;
         
-        Receiver _receiver = new Receiver(Guid.NewGuid());
+        Receiver _receiver = new Receiver(Guid.NewGuid(), new Logger());
         static ClientSocket _clientSocket;
         GameController _controller;
 

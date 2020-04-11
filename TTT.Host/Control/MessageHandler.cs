@@ -12,7 +12,7 @@ namespace TTT.Host.Control
         {
             try
             {
-                gameCommand = JsonConvert.DeserializeObject<IGameCommand>(message);
+                gameCommand = JsonConvert.DeserializeObject(message) as IGameCommand;
                 return gameCommand != null;
             }
             catch
