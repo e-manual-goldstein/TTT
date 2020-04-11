@@ -57,7 +57,7 @@ namespace TTT.Client
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
             if (!GameIsInProgress())
-                AddConnectButton(this);
+                AddListenButton(this);
             else
                 AddGameGrid(this);        
 
@@ -68,6 +68,47 @@ namespace TTT.Client
         bool GameIsInProgress()
         {
             return _game != null && _clientSocket != null && _clientSocket.IsOpen;
+        }
+        private void AddListenButton(MainActivity mainActivity)
+        {
+            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
+            var baseX = (_width - Constants.CellSizeClient) / 2;
+            var baseY = (_height - Constants.CellSizeClient) / 2;
+            var frameLayout = new FrameLayout(mainActivity);
+            var button = new Button(mainActivity);
+            button.LayoutParameters = baseLayout;
+            button.SetX(baseX);
+            button.SetY(baseY);
+            button.SetBackgroundColor(Color.Gray);
+            button.SetTextColor(Color.White);
+            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
+            button.Text = "LISTEN";
+            button.Click += EventListener;
+            frameLayout.AddView(button);
+            SetContentView(frameLayout);
+        }
+
+        private void EventListener(object sender, EventArgs e)
+        {
+            RunOnUiThread(async () => await Listen(sender, e));
+        }
+
+        private async Task Listen(object sender, EventArgs e)
+        {
+            var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
+
+            using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
+            {
+                await listener.ReceiveAsync().ContinueWith(task =>
+                {
+                    var message = UdpMessage.FromByteArray(task.Result.Buffer);
+                    _clientSocket = new ClientSocket(IPAddress.Parse(message.Payload));
+                    _clientSocket.Send("Connected");
+                    //Need to configure the Controller's client ID
+                    _controller = new GameController(_receiver.DeviceId, _clientSocket);
+                    AsyncAddGameGrid(this);
+                });
+            }
         }
 
         private void AddConnectButton(MainActivity mainActivity)

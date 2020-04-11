@@ -11,6 +11,7 @@ using System.IO;
 using TTT.Host;
 using TTT.Common;
 using TTT.Host.Control;
+using System.Threading;
 
 namespace TTT.Core
 {
@@ -21,44 +22,82 @@ namespace TTT.Core
         Logger _logger;
         MessageHandler _messageHandler;
         GameController _gameController;
+        IPAddress tcpListenerAddresss;
+        TcpListener _server;
+        IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
         public SocketHub(Logger logger, MessageHandler messageHandler, GameController gameController)
         {
             _logger = logger;
             _messageHandler = messageHandler;
             _gameController = gameController;
-            //_broadcaster.BeginBroadcast((address, id) => RequestSocketConnection(address, id));
-
+            StartServer();
         }
-        
-        Dictionary<string, TcpListener> _serverDictionary = new Dictionary<string, TcpListener>();
-        
 
-        public TcpListener GetServer(IPAddress ipAddress)
+        #region UDP Echo
+        private void StartServer()
         {
-            if (ipAddress != null)
+            using (var listener = new UdpClient(Constants.SERVER_LISTEN_PORT))
             {
-                return GetServer(ipAddress.ToString());
+                var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                //await message
+                Task.Run(() => 
+                {
+                    var message = UdpMessage.FromByteArray(listener.Receive(ref targetEndPoint));
+                    _logger.Log(message.Payload + $"{targetEndPoint.Address}:{PORT_NO}");
+                    tcpListenerAddresss = targetEndPoint.Address;
+                    _server = new TcpListener(targetEndPoint.Address, PORT_NO);
+                    _server.Start();
+                });
+                using (var speaker = new UdpClient())
+                {
+                    speaker.Send(new UdpMessage("Starting server on: "), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                }
             }
-            return null;
         }
 
-        public TcpListener GetServer(string ipAddress)
+        #endregion
+
+        #region Connect to Clients
+
+        public async Task<TcpClient> ConnectAsync()
         {
-            if (_serverDictionary.ContainsKey(ipAddress))
+            _logger.Log($"Accepting Clients");
+            var socketId = Guid.NewGuid();
+            var client = _server.AcceptTcpClientAsync().ContinueWith(task => 
             {
-                return _serverDictionary[ipAddress];
-            }
-            _logger.Log($"Creating new server on {ipAddress}:{PORT_NO}");
-            return _serverDictionary[ipAddress] = new TcpListener(IPAddress.Parse(ipAddress), PORT_NO);
+                _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _gameController);
+                _activeSockets[socketId].Client = task.Result;
+                _logger.Log($"Socket Connected");
+                return _activeSockets[socketId].Client;
+            });
+            if (!BroadcastInvitation(socketId))
+                return null;
+            return await client;
         }
 
-        IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
+        private bool BroadcastInvitation(Guid socketId)
+        {
+            using (var broadcaster = new UdpClient() { EnableBroadcast = true })
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    if (_activeSockets.ContainsKey(socketId))
+                        return true;
+                    _logger.Log($"Pinging client... [{i}]");
+                    broadcaster.Send(new UdpMessage(tcpListenerAddresss.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                    Thread.Sleep(1000);
+                }
+                return false;
+            }
+        }
 
-        public Guid RequestSocketConnection(IPAddress ipAddress, Guid id)
+        #endregion
+
+        public Guid RequestSocketConnection(Guid id)
         {
             _logger.Log($"Requesting socket connection");
-            var server = GetServer(ipAddress);
+            var server = _server;
             _logger.Log($"Starting Server: {server.LocalEndpoint}");
             server.Start();
             if (_activeSockets.ContainsKey(id))
@@ -66,7 +105,7 @@ namespace TTT.Core
                 _logger.Log("Found connection for same Id, disposing old connection");
                 _activeSockets[id].Kill();
             }
-            _activeSockets[id] = new GameSocket(_logger,_messageHandler,_gameController);
+            _activeSockets[id] = new GameSocket(_logger, _messageHandler, _gameController);
             _logger.Log($"Opening Socket for {id}");
             _activeSockets[id].Client = server.AcceptTcpClient();
             _logger.Log($"Socket Connected");

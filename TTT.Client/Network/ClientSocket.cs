@@ -14,9 +14,11 @@ namespace TTT.Client
     {
         IPAddress _serverAddress;
         bool _isOpen;
-        public ClientSocket(IPAddress serverAddress)
+        public ClientSocket(IPAddress serverAddress, bool openSocket = false)
         {
             _serverAddress = serverAddress;
+            if (openSocket)
+                openWebSocket();
         }
 
         public bool IsOpen => _isOpen;
@@ -29,6 +31,11 @@ namespace TTT.Client
         public void Send(string message)
         {
             WebSocket.Send(message);
+        }
+
+        public void OpenSocket()
+        {
+            openWebSocket();
         }
 
         protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);

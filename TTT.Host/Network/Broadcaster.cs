@@ -92,30 +92,30 @@ namespace TTT.Host
             //return IPAddress.TryParse(response.Payload, out IPAddress serverIp) ? serverIp : null;
         //}
 
-        public void BeginHandshake(Guid clientId, IPEndPoint targetEndPoint, SocketHub socketHub)
-        {
-            using (var server = new UdpClient())
-            {
-                _logger.Log($"Created new UdpCLient: {server.Client.LocalEndPoint}");
+        //public void BeginHandshake(Guid clientId, IPEndPoint targetEndPoint, SocketHub socketHub)
+        //{
+        //    using (var server = new UdpClient())
+        //    {
+        //        _logger.Log($"Created new UdpCLient: {server.Client.LocalEndPoint}");
 
-                _logger.Log($"Sending message to {targetEndPoint.Address}:{targetEndPoint.Port}");
-                server.Send(new UdpMessage(clientId.ToString()), targetEndPoint);
+        //        _logger.Log($"Sending message to {targetEndPoint.Address}:{targetEndPoint.Port}");
+        //        server.Send(new UdpMessage(clientId.ToString()), targetEndPoint);
 
-                //await connection
-                server.ReceiveAsync()
-                    .ContinueWith(async (task) =>
-                    {
-                        var result = await task;
-                        var message = UdpMessage.FromByteArray(result.Buffer);
-                        _logger.Log($"Received message '{message.Payload}'");
-                        if (IPAddress.TryParse(message.Payload, out var address))
-                        {
-                            socketHub.RequestSocketConnection(address, clientId);
-                            socketHub.OpenConnectionAsync(clientId);
-                        }
-                    });
-            }
-        }
+        //        //await connection
+        //        server.ReceiveAsync()
+        //            .ContinueWith(async (task) =>
+        //            {
+        //                var result = await task;
+        //                var message = UdpMessage.FromByteArray(result.Buffer);
+        //                _logger.Log($"Received message '{message.Payload}'");
+        //                if (IPAddress.TryParse(message.Payload, out var address))
+        //                {
+        //                    socketHub.RequestSocketConnection(address, clientId);
+        //                    socketHub.OpenConnectionAsync(clientId);
+        //                }
+        //            });
+        //    }
+        //}
 
         //private UdpMessage HandleReceivedMessage(byte[] messageData)
         //{
