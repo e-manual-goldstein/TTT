@@ -23,7 +23,7 @@ namespace TTT.Client
 
         public bool IsOpen => _isOpen;
 
-        public void Send(IGameCommand command)
+        public void Send(GameCommand command)
         {
             Send(JsonConvert.SerializeObject(command));
         }

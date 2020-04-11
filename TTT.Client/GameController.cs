@@ -19,7 +19,8 @@ namespace TTT.Client
 
         public void TakeTurn(Cell cell)
         {
-            _clientSocket.Send(new TurnCommand(_clientId,cell));
+            var turnCommand = new TurnCommand(_clientId, cell);
+            _clientSocket.Send(new GameCommand(turnCommand));
         }
     }
 }

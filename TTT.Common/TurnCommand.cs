@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TTT.Common
 {
-    public class TurnCommand : IGameCommand
+    public class TurnCommand : ISubCommand
     {
         public TurnCommand(Guid playerId, Cell cell)
         {

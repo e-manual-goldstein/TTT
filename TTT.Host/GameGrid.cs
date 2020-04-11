@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Windows;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using TTT.Common;
+using TTT.Host;
 
 namespace TTT.Core
 {
@@ -16,7 +18,7 @@ namespace TTT.Core
         Func<float> _widthFunc;
         Func<float> _heightFunc;
 
-        public GameGrid(float screenWidth, float screenHeight) 
+        public GameGrid(float screenWidth, float screenHeight) : this()
         {
             
             _screenWidth = screenWidth;
@@ -25,15 +27,18 @@ namespace TTT.Core
             Canvas.Width = screenWidth;
             Canvas.Height = screenHeight;
             
-            _allCells = CreateCellArray();
         }
 
         public GameGrid(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
         {
             _widthFunc = widthFunc;
             _heightFunc = heightFunc;
+        }
 
+        public GameGrid()
+        {
             _allCells = CreateCellArray();
+            Canvas = new Canvas();
         }
 
         public Canvas Canvas { get; set; }
@@ -74,11 +79,13 @@ namespace TTT.Core
         }
 
 
-        public void DrawCells()
+        public void DrawCells(float width, float height)
         {
-            
-            var baseX = (_widthFunc() - (3 * Constants.CellSizeHost)) / 2;
-            var baseY = (_heightFunc() - (3 * Constants.CellSizeHost)) / 2;
+            Canvas.Width = width;
+            Canvas.Height = height;
+
+            var baseX = (width - (3 * Constants.CellSizeHost)) / 2;
+            var baseY = (height - (3 * Constants.CellSizeHost)) / 2;
 
             foreach (var cell in _allCells)
             {
@@ -93,22 +100,33 @@ namespace TTT.Core
             cellCanvas.Width = Constants.CellSizeHost;
             cellCanvas.Height = Constants.CellSizeHost;
             Canvas.SetLeft(cellCanvas, baseX + (cell.I * Constants.CellSizeHost));
-            Canvas.SetBottom(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
+            Canvas.SetTop(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
             cellCanvas.Background = new SolidColorBrush(Colors.Gray);
             cellCanvas.Children.Add(DrawTextBox(cell, Constants.CellSizeHost));
             return cellCanvas;
         }
 
-        public TextBlock DrawTextBox(Cell cell, int size)
+        public Label DrawTextBox(Cell cell, int size)
         {
-            var textBlock = new TextBlock();
-            textBlock.Height = size - 2;
-            textBlock.Width = size - 2;
-            textBlock.Background = new SolidColorBrush(Colors.White);
-            Canvas.SetBottom(textBlock, 1);
-            Canvas.SetLeft(textBlock, 1);
-            cell.UpdateValue = (newValue) => textBlock.Text = newValue.ToString();
-            return textBlock;
+            var label = new Label();
+            label.Height = size - 2;
+            label.Width = size - 2;
+            label.Background = new SolidColorBrush(Colors.White);
+            label.FontSize = 40;
+            label.HorizontalContentAlignment = HorizontalAlignment.Center;
+            label.VerticalContentAlignment = VerticalAlignment.Center;
+            Canvas.SetBottom(label, 1);
+            Canvas.SetLeft(label, 1);
+            cell.UpdateValue = (newValue) => UpdateCellValue(label, newValue);
+            return label;
+        }
+
+        public void UpdateCellValue(Label label, Marker newValue)
+        {
+            App.Current.Dispatcher.Invoke(() => 
+            {
+                label.Content = newValue.ToString();
+            });
         }
     }   
 }

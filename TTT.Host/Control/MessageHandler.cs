@@ -8,18 +8,27 @@ namespace TTT.Host.Control
 {
     public class MessageHandler
     {
-        public bool TryParse(string message, out IGameCommand gameCommand)
+        Logger _logger;
+
+        public MessageHandler(Logger logger)
+        {
+            _logger = logger;
+        }
+
+        public bool TryParse(string message, out GameCommand gameCommand)
         {
             try
             {
-                gameCommand = JsonConvert.DeserializeObject(message) as IGameCommand;
+                gameCommand = JsonConvert.DeserializeObject<GameCommand>(message);
                 return gameCommand != null;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Log($"{ex}");
                 gameCommand = null;
                 return false;
             }
         }
+
     }
 }

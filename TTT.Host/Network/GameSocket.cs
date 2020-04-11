@@ -106,9 +106,9 @@ namespace TTT.Core
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
                 _logger.Log($"Received message: {messageReceived}");
-                if (_messageHandler.TryParse(messageReceived, out IGameCommand gameCommand))
+                if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
                 {
-                    _gameController.ExecuteCommand(gameCommand);
+                    _gameController.ExecuteCommand(gameCommand, (msg) => Send(msg));
                 }
                 //Broadcast(messageReceived);
             }

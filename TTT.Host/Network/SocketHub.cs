@@ -41,7 +41,7 @@ namespace TTT.Core
             {
                 var targetEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 //await message
-                Task.Run(() => 
+                Task.Run(() =>
                 {
                     var message = UdpMessage.FromByteArray(listener.Receive(ref targetEndPoint));
                     _logger.Log(message.Payload + $"{targetEndPoint.Address}:{PORT_NO}");
@@ -60,36 +60,41 @@ namespace TTT.Core
 
         #region Connect to Clients
 
-        public async Task<TcpClient> ConnectAsync()
+        public async Task<Guid> ConnectAsync()
         {
             _logger.Log($"Accepting Clients");
+            // Create CancellationTokenSource.
+            var source = new CancellationTokenSource();
             var socketId = Guid.NewGuid();
-            var client = _server.AcceptTcpClientAsync().ContinueWith(task => 
+            var client = _server.AcceptTcpClientAsync().ContinueWith(task =>
             {
+                _logger.Log($"Connecting Socket");
                 _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _gameController);
                 _activeSockets[socketId].Client = task.Result;
-                _logger.Log($"Socket Connected");
-                return _activeSockets[socketId].Client;
+                _logger.Log("Cancelling Token");
+                source.Cancel();
+                return socketId;
             });
-            if (!BroadcastInvitation(socketId))
-                return null;
+            BroadcastInvitation(socketId, source.Token);
             return await client;
         }
 
-        private bool BroadcastInvitation(Guid socketId)
+        private void BroadcastInvitation(Guid socketId, CancellationToken cancellationToken)
         {
-            using (var broadcaster = new UdpClient() { EnableBroadcast = true })
+            Task.Run(() =>
             {
-                for (int i = 0; i < 10; i++)
+                using (var broadcaster = new UdpClient() { EnableBroadcast = true })
                 {
-                    if (_activeSockets.ContainsKey(socketId))
-                        return true;
-                    _logger.Log($"Pinging client... [{i}]");
-                    broadcaster.Send(new UdpMessage(tcpListenerAddresss.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
-                    Thread.Sleep(1000);
+                    _logger.Log($"Pinging client...");
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        //TEST THIS
+                        broadcaster.Send(new UdpMessage(socketId.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                        Thread.Sleep(1000);
+                    }
+                    _logger.Log("Stopped Pinging...");
                 }
-                return false;
-            }
+            }, cancellationToken);
         }
 
         #endregion

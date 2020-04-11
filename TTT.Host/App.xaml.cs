@@ -20,44 +20,26 @@ namespace TTT.Host
     public partial class App : Application
     {
         Logger _logger;
+        static SocketHub _socketHub;
+        static GameGrid _gameGrid;
 
         public App()
         {
+            _gameGrid = new GameGrid();
             _logger = new Logger();
             //_listener = new Listener(_logger);
             //_broadcaster = new Broadcaster(_logger);
-            _socketHub = new SocketHub(_logger, new MessageHandler(), new GameController(Host.MainWindow.GameGrid));    
-            Host.MainWindow.ButtonAction = () =>
+            _socketHub = new SocketHub(_logger, new MessageHandler(_logger), new GameController(_gameGrid, _logger));
+            Host.MainWindow.ButtonAction = async () =>
             {
-                var client = _socketHub.ConnectAsync();
-
-                Console.WriteLine(client.Result);
+                var socketId = await _socketHub.ConnectAsync();
+                await _socketHub.OpenConnectionAsync(socketId);
+                //Console.WriteLine(client.Result);
                 //await _listener.StartAsync((msg, ep) => handleIncomingMessage(msg, ep));
                 //_socketHub.RequestSocketConnection(IPAddress.Parse("192.168.0.10"), Guid.NewGuid());
             };
         }
 
-
-        //private void handleIncomingMessage(UdpMessage message, IPEndPoint endPoint)
-        //{
-        //    if (Guid.TryParse(message.Payload, out var id))
-        //    {
-        //        _logger.Log($"Begining Handshake for ID:{id}");
-        //        _broadcaster.BeginHandshake(id, endPoint, _socketHub);
-        //    }
-        //}
-
-        //Broadcaster _broadcaster;
-
-        //public Broadcaster Broadcaster
-        //{
-        //    get
-        //    {
-        //        return _broadcaster;
-        //    }
-        //}
-
-        private static SocketHub _socketHub;
         public static SocketHub SocketHub
         {
             get
@@ -66,13 +48,7 @@ namespace TTT.Host
             }
         }
 
-        //private static Listener _listener;
-        //public static Listener Listener 
-        //{
-        //    get
-        //    {
-        //        return _listener;
-        //    }
-        //}
+        public static GameGrid GameGrid { get => _gameGrid; }
+
     }
 }

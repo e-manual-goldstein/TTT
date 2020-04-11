@@ -99,14 +99,18 @@ namespace TTT.Client
 
             using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
             {
+                while (_clientSocket == null)
                 await listener.ReceiveAsync().ContinueWith(task =>
                 {
                     var message = UdpMessage.FromByteArray(task.Result.Buffer);
-                    _clientSocket = new ClientSocket(IPAddress.Parse(message.Payload));
-                    _clientSocket.Send("Connected");
-                    //Need to configure the Controller's client ID
-                    _controller = new GameController(_receiver.DeviceId, _clientSocket);
-                    AsyncAddGameGrid(this);
+                    if (Guid.TryParse(message.Payload, out Guid clientId))
+                    {
+                        _clientSocket = new ClientSocket(task.Result.RemoteEndPoint.Address);
+                        _clientSocket.Send($"{clientId}");
+                        //Need to configure the Controller's client ID
+                        _controller = new GameController(clientId, _clientSocket);
+                        AsyncAddGameGrid(this);
+                    }
                 });
             }
         }
