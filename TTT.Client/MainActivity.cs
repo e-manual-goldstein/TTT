@@ -30,7 +30,7 @@ namespace TTT.Client
         
         Receiver _receiver = new Receiver(Guid.NewGuid(), new Logger());
         static ClientSocket _clientSocket;
-        GameController _controller;
+        ActionService _actionService;
 
         public Receiver Receiver
         {
@@ -44,7 +44,7 @@ namespace TTT.Client
         {
             _clientSocket = new ClientSocket(serverAddress);
             _clientSocket.Send("Connected");
-            _controller = new GameController(_receiver.DeviceId, _clientSocket);
+            _actionService = new ActionService(_receiver.DeviceId, _clientSocket);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -107,8 +107,7 @@ namespace TTT.Client
                     {
                         _clientSocket = new ClientSocket(task.Result.RemoteEndPoint.Address);
                         _clientSocket.Send($"{clientId}");
-                        //Need to configure the Controller's client ID
-                        _controller = new GameController(clientId, _clientSocket);
+                        _actionService = new ActionService(clientId, _clientSocket);
                         AsyncAddGameGrid(this);
                     }
                 });
@@ -136,7 +135,7 @@ namespace TTT.Client
 
         private void AddGameGrid(MainActivity mainActivity)
         {
-            _game = GetGame(_controller);
+            _game = GetGame(_actionService);
             _game.FrameLayout = new FrameLayout(mainActivity);
             
             _game.DrawCells_Func();
@@ -161,14 +160,14 @@ namespace TTT.Client
             SetContentView(frameLayout);
         }
 
-        public GameGrid GetGame(GameController _controller)
+        public GameGrid GetGame(ActionService actionService)
         {
             if (_game != null)
             {
                 return _game;
             }
             //return new GameGrid(this, _width, _height);
-            return new GameGrid(this, _controller, () => Resources.DisplayMetrics.WidthPixels, () => Resources.DisplayMetrics.HeightPixels);
+            return new GameGrid(this, actionService, () => Resources.DisplayMetrics.WidthPixels, () => Resources.DisplayMetrics.HeightPixels);
         }
     }
 }

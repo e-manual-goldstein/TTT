@@ -8,35 +8,13 @@ using TTT.Core;
 
 namespace TTT.Host.Control
 {
-    public class GameController
+    public class GameController : AbstractController
     {
-        Dictionary<Type, MethodInfo> _actionDictionary = new Dictionary<Type, MethodInfo>();
         GameGrid _gameGrid;
-        Logger _logger;
-        Action<string> PostBackAction;
 
-        public GameController(GameGrid gameGrid, Logger logger)
+        public GameController(GameGrid gameGrid, Logger logger) : base(logger)
         {
             _gameGrid = gameGrid;
-            _logger = logger;
-        }
-
-        public void ExecuteCommand(GameCommand gameCommand, Action<string> postbackMessage)
-        {
-            if (!_actionDictionary.ContainsKey(gameCommand.CommandType))
-            {
-                if (!FindAction(gameCommand.CommandType))
-                    return;
-            }
-            PostBackAction = postbackMessage;
-            _actionDictionary[gameCommand.CommandType].Invoke(this, new object[] { gameCommand.SubCommand() });
-            PostBackAction = null;
-        }
-
-        private bool FindAction(Type argumentType)
-        {
-            _actionDictionary[argumentType] = GetType().GetMethods().SingleOrDefault(m => m.GetParameters().FirstOrDefault()?.ParameterType == argumentType);
-            return _actionDictionary[argumentType] != null;
         }
 
         public void TakeTurn(TurnCommand turnCommand)

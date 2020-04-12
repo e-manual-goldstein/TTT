@@ -24,17 +24,17 @@ namespace TTT.Client
         Func<float> _heightFunc;
 
 
-        public GameGrid(Context context, GameController controller, Func<float> widthFunc, Func<float> heightFunc)
+        public GameGrid(Context context, ActionService actionService, Func<float> widthFunc, Func<float> heightFunc)
         {
             _context = context;
             _widthFunc = widthFunc;
             _heightFunc = heightFunc;
-            _allCells = CreateCells(controller);
+            _allCells = CreateCells(actionService);
         }
 
         public FrameLayout FrameLayout { get; set; }
 
-        public Cell[] CreateCells(GameController controller)
+        public Cell[] CreateCells(ActionService actionService)
         {
             var cells = new List<Cell>();
             for (int i = 0; i < 3; i++)
@@ -42,7 +42,7 @@ namespace TTT.Client
                 for (int j = 0; j < 3; j++)
                 {
                     var cell = new Cell(i, j);
-                    cell.TakeTurnAction = (c) => controller.TakeTurn(c);
+                    cell.TakeTurnAction = (c) => actionService.TakeTurn(c);
                     cells.Add(cell);
                 }
             }

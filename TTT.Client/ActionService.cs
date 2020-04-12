@@ -6,12 +6,12 @@ using TTT.Common;
 
 namespace TTT.Client
 {
-    public class GameController
+    public class ActionService
     {
         ClientSocket _clientSocket;
         Guid _clientId;
 
-        public GameController(Guid clientId, ClientSocket clientSocket)
+        public ActionService(Guid clientId, ClientSocket clientSocket)
         {
             _clientId = clientId;
             _clientSocket = clientSocket;

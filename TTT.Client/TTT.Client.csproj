@@ -65,7 +65,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameController.cs" />
+    <Compile Include="ActionService.cs" />
     <Compile Include="GameGrid.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Network\ClientSocket.cs" />
