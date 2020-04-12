@@ -10,11 +10,11 @@ using Xamarin.Essentials;
 
 namespace TTT.Client
 {
-    public class ClientSocket
+    public class HostSocket
     {
         IPAddress _serverAddress;
         bool _isOpen;
-        public ClientSocket(IPAddress serverAddress, bool openSocket = false)
+        public HostSocket(IPAddress serverAddress, bool openSocket = false)
         {
             _serverAddress = serverAddress;
             if (openSocket)
@@ -59,29 +59,6 @@ namespace TTT.Client
             webSocketClient.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
             webSocketClient.Open();
             return webSocketClient;
-        }
-
-        public void Test()
-        {
-            var webSocketClient = WebSocket;
-
-            if (!m_OpenedEvent.WaitOne(5000))
-            {
-                //Assert.Fail("Failed to Opened session ontime");
-            }
-
-            for (var i = 0; i < 10; i++)
-            {
-                var message = Guid.NewGuid().ToString();
-
-                webSocketClient.Send(message);
-
-                if (!m_MessageReceiveEvent.WaitOne(5000))
-                {
-                    //Assert.Fail("Failed to get echo messsage on time");
-                    break;
-                }
-            }
         }
         
         protected void webSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)

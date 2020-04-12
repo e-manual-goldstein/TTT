@@ -8,19 +8,19 @@ namespace TTT.Client
 {
     public class ActionService
     {
-        ClientSocket _clientSocket;
+        HostSocket _hostSocket;
         Guid _clientId;
 
-        public ActionService(Guid clientId, ClientSocket clientSocket)
+        public ActionService(Guid clientId, HostSocket hostSocket)
         {
             _clientId = clientId;
-            _clientSocket = clientSocket;
+            _hostSocket = hostSocket;
         }
 
         public void TakeTurn(Cell cell)
         {
             var turnCommand = new TurnCommand(_clientId, cell);
-            _clientSocket.Send(new GameCommand(turnCommand));
+            _hostSocket.Send(new GameCommand(turnCommand));
         }
     }
 }

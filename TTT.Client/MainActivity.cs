@@ -29,7 +29,7 @@ namespace TTT.Client
         static GameGrid _game;
         
         Receiver _receiver = new Receiver(Guid.NewGuid(), new Logger());
-        static ClientSocket _clientSocket;
+        static HostSocket _hostSocket;
         ActionService _actionService;
 
         public Receiver Receiver
@@ -40,11 +40,11 @@ namespace TTT.Client
             }
         }
 
-        void LoadClientSocket(IPAddress serverAddress)
+        void LoadHostSocket(IPAddress serverAddress)
         {
-            _clientSocket = new ClientSocket(serverAddress);
-            _clientSocket.Send("Connected");
-            _actionService = new ActionService(_receiver.DeviceId, _clientSocket);
+            _hostSocket = new HostSocket(serverAddress);
+            _hostSocket.Send("Connected");
+            _actionService = new ActionService(_receiver.DeviceId, _hostSocket);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -67,7 +67,7 @@ namespace TTT.Client
 
         bool GameIsInProgress()
         {
-            return _game != null && _clientSocket != null && _clientSocket.IsOpen;
+            return _game != null && _hostSocket != null && _hostSocket.IsOpen;
         }
         private void AddListenButton(MainActivity mainActivity)
         {
@@ -99,15 +99,15 @@ namespace TTT.Client
 
             using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
             {
-                while (_clientSocket == null)
+                while (_hostSocket == null)
                 await listener.ReceiveAsync().ContinueWith(task =>
                 {
                     var message = UdpMessage.FromByteArray(task.Result.Buffer);
                     if (Guid.TryParse(message.Payload, out Guid clientId))
                     {
-                        _clientSocket = new ClientSocket(task.Result.RemoteEndPoint.Address);
-                        _clientSocket.Send($"{clientId}");
-                        _actionService = new ActionService(clientId, _clientSocket);
+                        _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address);
+                        _hostSocket.Send($"{clientId}");
+                        _actionService = new ActionService(clientId, _hostSocket);
                         AsyncAddGameGrid(this);
                     }
                 });
@@ -144,10 +144,10 @@ namespace TTT.Client
 
         internal void Connect(object sender, EventArgs e)
         {
-            if (_clientSocket == null)
-                Task.Run(() => Receiver.Begin(ipAddress => LoadClientSocket(ipAddress), () => AsyncAddGameGrid(this)));
+            if (_hostSocket == null)
+                Task.Run(() => Receiver.Begin(ipAddress => LoadHostSocket(ipAddress), () => AsyncAddGameGrid(this)));
             else
-                _clientSocket.Send("Still Connected");
+                _hostSocket.Send("Still Connected");
         }
 
         private void AsyncAddGameGrid(MainActivity mainActivity)
