@@ -49,29 +49,7 @@ namespace TTT.Client
             return cells.ToArray();
         }
 
-        //public void DrawCells()
-        //{
-        //    var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-        //    var baseX = (_screenWidth - (3 * Constants.CellSizeClient)) / 2;
-        //    var baseY = (_screenHeight - (3 * Constants.CellSizeClient)) / 2;
-        //    foreach (var cell in _allCells)
-        //    {
-        //        var button = new Button(_context);
-        //        button.LayoutParameters = baseLayout;
-        //        var x = baseX + (cell.I * Constants.CellSizeClient);
-        //        var y = baseY + (cell.J * Constants.CellSizeClient);
-        //        button.SetX(x);
-        //        button.SetY(y);
-        //        button.SetBackgroundColor(Color.Gray);
-        //        button.SetTextColor(Color.White);
-        //        button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-        //        button.Text = cell.Value.ToString();
-        //        button.Click += cell.ClickCell;
-        //        FrameLayout.AddView(button);
-        //    }
-        //}
-
-        public void DrawCells_Func()
+        public void DrawCells()
         {
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
             var baseX = (_widthFunc() - (3 * Constants.CellSizeClient)) / 2;

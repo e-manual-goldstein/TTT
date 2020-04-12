@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TTT.Common;
 
-namespace TTT.Host.Control
+namespace TTT.Common
 {
     public class MessageHandler
     {

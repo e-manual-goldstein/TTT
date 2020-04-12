@@ -7,8 +7,6 @@ namespace TTT.Common
 {
     public class GameCommand
     {
-        string _subCommand;
-
         public GameCommand()
         {
 
@@ -17,20 +15,16 @@ namespace TTT.Common
         public GameCommand(ISubCommand subCommand)
         {
             CommandType = subCommand.GetType();
-            _subCommand = JsonConvert.SerializeObject(subCommand);
+            SubCommandString = JsonConvert.SerializeObject(subCommand);
         }
 
         public Type CommandType { get; set; }
 
-        public string SubCommandString
-        {
-            get => _subCommand;
-            set => _subCommand = value;
-        }
+        public string SubCommandString { get; set; }
         
         public ISubCommand SubCommand()
         {
-            return JsonConvert.DeserializeObject(_subCommand, CommandType) as ISubCommand;
+            return JsonConvert.DeserializeObject(SubCommandString, CommandType) as ISubCommand;
         }
     }
 }

@@ -13,10 +13,14 @@ namespace TTT.Client
     public class HostSocket
     {
         IPAddress _serverAddress;
+        Logger _logger;
+
         bool _isOpen;
-        public HostSocket(IPAddress serverAddress, bool openSocket = false)
+
+        public HostSocket(IPAddress serverAddress, Logger logger, bool openSocket = false)
         {
             _serverAddress = serverAddress;
+            _logger = logger;
             if (openSocket)
                 openWebSocket();
         }
@@ -38,10 +42,6 @@ namespace TTT.Client
             openWebSocket();
         }
 
-        protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
-        protected AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
-        protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
-
         WebSocket _webSocket;
         WebSocket WebSocket
         {
@@ -56,15 +56,15 @@ namespace TTT.Client
             var webSocketClient = new WebSocket($"ws://{_serverAddress.ToString()}:69/");
             webSocketClient.Opened += new EventHandler(webSocketClient_Opened);
             webSocketClient.Closed += new EventHandler(webSocketClient_Closed);
-            webSocketClient.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
+            webSocketClient.MessageReceived += WebSocketClient_MessageReceived;
+            //webSocketClient.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
             webSocketClient.Open();
             return webSocketClient;
         }
-        
-        protected void webSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
+
+        private void WebSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            //Snackbar.Make(MainView, e.Message, Snackbar.LengthLong)
-            //    .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+            _logger.Log(e.Message);
         }
 
         protected void webSocketClient_Closed(object sender, EventArgs e)

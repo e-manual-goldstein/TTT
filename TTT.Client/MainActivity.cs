@@ -24,28 +24,13 @@ namespace TTT.Client
     {
         int _width;
         int _height;
-        private Logger _logger = new Logger();
-        public View MainView { get; set; }
+
         static GameGrid _game;
-        
-        Receiver _receiver = new Receiver(Guid.NewGuid(), new Logger());
+        static Lazy<Logger> _logger = new Lazy<Logger>();
         static HostSocket _hostSocket;
         ActionService _actionService;
 
-        public Receiver Receiver
-        {
-            get
-            {
-                return _receiver;
-            }
-        }
-
-        void LoadHostSocket(IPAddress serverAddress)
-        {
-            _hostSocket = new HostSocket(serverAddress);
-            _hostSocket.Send("Connected");
-            _actionService = new ActionService(_receiver.DeviceId, _hostSocket);
-        }
+        public Logger Logger { get => _logger.Value; }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -59,8 +44,7 @@ namespace TTT.Client
             if (!GameIsInProgress())
                 AddListenButton(this);
             else
-                AddGameGrid(this);        
-
+                AddGameGrid(this);
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
         }
@@ -69,6 +53,7 @@ namespace TTT.Client
         {
             return _game != null && _hostSocket != null && _hostSocket.IsOpen;
         }
+
         private void AddListenButton(MainActivity mainActivity)
         {
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
@@ -105,7 +90,7 @@ namespace TTT.Client
                     var message = UdpMessage.FromByteArray(task.Result.Buffer);
                     if (Guid.TryParse(message.Payload, out Guid clientId))
                     {
-                        _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address);
+                        _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, Logger);
                         _hostSocket.Send($"{clientId}");
                         _actionService = new ActionService(clientId, _hostSocket);
                         AsyncAddGameGrid(this);
@@ -114,40 +99,13 @@ namespace TTT.Client
             }
         }
 
-        private void AddConnectButton(MainActivity mainActivity)
-        {
-            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-            var baseX = (_width - Constants.CellSizeClient) / 2;
-            var baseY = (_height - Constants.CellSizeClient) / 2;
-            var frameLayout = new FrameLayout(mainActivity);
-            var button = new Button(mainActivity);
-            button.LayoutParameters = baseLayout;
-            button.SetX(baseX);
-            button.SetY(baseY);
-            button.SetBackgroundColor(Color.Gray);
-            button.SetTextColor(Color.White);
-            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-            button.Text = "CONNECT";
-            button.Click += Connect;
-            frameLayout.AddView(button);
-            SetContentView(frameLayout);
-        }
-
         private void AddGameGrid(MainActivity mainActivity)
         {
             _game = GetGame(_actionService);
             _game.FrameLayout = new FrameLayout(mainActivity);
             
-            _game.DrawCells_Func();
+            _game.DrawCells();
             ReloadView(_game.FrameLayout);
-        }
-
-        internal void Connect(object sender, EventArgs e)
-        {
-            if (_hostSocket == null)
-                Task.Run(() => Receiver.Begin(ipAddress => LoadHostSocket(ipAddress), () => AsyncAddGameGrid(this)));
-            else
-                _hostSocket.Send("Still Connected");
         }
 
         private void AsyncAddGameGrid(MainActivity mainActivity)
