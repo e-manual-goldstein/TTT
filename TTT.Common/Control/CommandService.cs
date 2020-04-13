@@ -4,18 +4,19 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace TTT.Common.Control
+namespace TTT.Common
 {
     public class CommandService
     {
+        IServiceProvider _serviceProvider;
         Logger _logger;
         Type[] _controllerTypes;
         Dictionary<Type, MethodInfo> _actionDictionary = new Dictionary<Type, MethodInfo>();
 
-        public CommandService(Logger logger, Type[] controllerTypes)
+        public CommandService(IServiceProvider serviceProvider, Logger logger, Type[] controllerTypes)
         {
             _logger = logger;
-            //validate these
+            _serviceProvider = serviceProvider;
             _controllerTypes = controllerTypes;
         }
 
@@ -26,21 +27,22 @@ namespace TTT.Common.Control
                 if (!FindAction(gameCommand.CommandType))
                     return "Unknown command";
             }
-            return CreateControllerAndExecuteCommand(_actionDictionary[gameCommand.CommandType].DeclaringType);
+            var action = _actionDictionary[gameCommand.CommandType];
+            return CreateControllerAndExecuteCommand(action.DeclaringType, gameCommand);
         }
 
         private bool FindAction(Type argumentType)
         {
-            _actionDictionary[argumentType] = _controllerTypes.SelectMany(conType => conType.GetType().GetMethods())
+            _actionDictionary[argumentType] = _controllerTypes.SelectMany(conType => conType.GetMethods())
                 .SingleOrDefault(m => m.GetParameters().FirstOrDefault()?.ParameterType == argumentType);
             return _actionDictionary[argumentType] != null;
         }
 
-        private string CreateControllerAndExecuteCommand(Type controllerType)
+        private string CreateControllerAndExecuteCommand(Type controllerType, GameCommand gameCommand)
         {
-            //var controller = Activator.CreateInstance(controllerType, );
-            //_actionDictionary[gameCommand.CommandType].Invoke(, new object[] { gameCommand.SubCommand() });
-            throw new NotImplementedException();
+            var controller = _serviceProvider.GetService(controllerType);
+            _actionDictionary[gameCommand.CommandType].Invoke(controller, new object[] { gameCommand.SubCommand() });
+            return "";
         }
     }
 }

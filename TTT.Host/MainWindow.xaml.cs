@@ -21,14 +21,14 @@ namespace TTT.Host
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(GameGrid gameGrid)
         {
             InitializeComponent();
-            
-            
-            App.GameGrid.DrawCells((float)Width, (float)Height);
-            Content = App.GameGrid.Canvas;
-            AddTestButton(App.GameGrid.Canvas);
+
+
+            gameGrid.DrawCells((float)Width, (float)Height);
+            Content = gameGrid.Canvas;
+            AddTestButton(gameGrid.Canvas);
         }
 
         private void AddTestButton(Canvas canvas)
@@ -45,6 +45,6 @@ namespace TTT.Host
         }
 
 
-        public static Action ButtonAction { get; set; }
+        public Action ButtonAction { get; set; }
     }
 }

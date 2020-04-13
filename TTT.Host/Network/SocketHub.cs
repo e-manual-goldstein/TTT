@@ -22,15 +22,17 @@ namespace TTT.Core
         Logger _logger;
         MessageHandler _messageHandler;
         GameController _gameController;
+        CommandService _commandService;
         IPAddress tcpListenerAddresss;
         TcpListener _server;
         IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
-        public SocketHub(Logger logger, MessageHandler messageHandler, GameController gameController)
+        public SocketHub(Logger logger, MessageHandler messageHandler, GameController gameController, CommandService commandService)
         {
             _logger = logger;
             _messageHandler = messageHandler;
             _gameController = gameController;
+            _commandService = commandService;
             StartServer();
         }
 
@@ -69,7 +71,7 @@ namespace TTT.Core
             var client = _server.AcceptTcpClientAsync().ContinueWith(task =>
             {
                 _logger.Log($"Connecting Socket");
-                _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _gameController);
+                _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _gameController, _commandService);
                 _activeSockets[socketId].Client = task.Result;
                 _logger.Log("Cancelling Token");
                 source.Cancel();
@@ -110,7 +112,7 @@ namespace TTT.Core
                 _logger.Log("Found connection for same Id, disposing old connection");
                 _activeSockets[id].Kill();
             }
-            _activeSockets[id] = new GameSocket(_logger, _messageHandler, _gameController);
+            _activeSockets[id] = new GameSocket(_logger, _messageHandler, _gameController, _commandService);
             _logger.Log($"Opening Socket for {id}");
             _activeSockets[id].Client = server.AcceptTcpClient();
             _logger.Log($"Socket Connected");

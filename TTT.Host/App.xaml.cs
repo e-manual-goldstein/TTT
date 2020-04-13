@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -19,36 +20,43 @@ namespace TTT.Host
     /// </summary>
     public partial class App : Application
     {
-        Logger _logger;
-        static SocketHub _socketHub;
-        static GameGrid _gameGrid;
+        private readonly ServiceProvider _serviceProvider;
+
+        private void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<MainWindow>();
+            services.AddSingleton<GameGrid>();
+            services.AddSingleton<SocketHub>();
+            services.AddSingleton<MessageHandler>();
+            services.AddSingleton<Logger>();
+            services.AddSingleton<CommandService>(provider =>
+            {
+                return new CommandService(provider, provider.GetService<Logger>(), new Type[]
+                {
+                    typeof(GameController)
+                });
+            });
+            services.AddScoped<GameController>();
+        }
+
+        private void OnStartup(object sender, StartupEventArgs e)
+        {
+            var socketHub = _serviceProvider.GetService<SocketHub>();
+            var mainWindow = _serviceProvider.GetService<MainWindow>();
+            mainWindow.ButtonAction = async () =>
+            {
+                var socketId = await socketHub.ConnectAsync();
+                await socketHub.OpenConnectionAsync(socketId);
+            };
+
+            mainWindow.Show();
+        }
 
         public App()
         {
-            _gameGrid = new GameGrid();
-            _logger = new Logger();
-            //_listener = new Listener(_logger);
-            //_broadcaster = new Broadcaster(_logger);
-            _socketHub = new SocketHub(_logger, new MessageHandler(_logger), new GameController(_gameGrid, _logger));
-            Host.MainWindow.ButtonAction = async () =>
-            {
-                var socketId = await _socketHub.ConnectAsync();
-                await _socketHub.OpenConnectionAsync(socketId);
-                //Console.WriteLine(client.Result);
-                //await _listener.StartAsync((msg, ep) => handleIncomingMessage(msg, ep));
-                //_socketHub.RequestSocketConnection(IPAddress.Parse("192.168.0.10"), Guid.NewGuid());
-            };
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            _serviceProvider = serviceCollection.BuildServiceProvider();
         }
-
-        public static SocketHub SocketHub
-        {
-            get
-            {
-                return _socketHub;
-            }
-        }
-
-        public static GameGrid GameGrid { get => _gameGrid; }
-
     }
 }

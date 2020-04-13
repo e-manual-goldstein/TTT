@@ -14,11 +14,14 @@ namespace TTT.Core
         Logger _logger;
         MessageHandler _messageHandler;
         GameController _gameController;
-        public GameSocket(Logger logger, MessageHandler messageHandler, GameController gameController)
+        CommandService _commandService;
+
+        public GameSocket(Logger logger, MessageHandler messageHandler, GameController gameController, CommandService commandService)
         {
             _logger = logger;
             _messageHandler = messageHandler;
             _gameController = gameController;
+            _commandService = commandService;
             KeepAlive = true;
         }
 
@@ -108,7 +111,7 @@ namespace TTT.Core
                 _logger.Log($"Received message: {messageReceived}");
                 if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
                 {
-                    _gameController.ExecuteCommand(gameCommand, (msg) => Send(msg));
+                    _commandService.ExecuteCommand(gameCommand);
                 }
                 //Broadcast(messageReceived);
             }

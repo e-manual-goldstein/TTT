@@ -21,7 +21,6 @@ namespace TTT.Host.Control
         {
             _logger.Log($"Player: {turnCommand.PlayerId} takes turn {turnCommand.Cell}");
             _gameGrid.GameCells[turnCommand.Cell.I, turnCommand.Cell.J].UpdateValue(turnCommand.Cell.Marker.Value);
-            PostBackAction("Message received");
         }
     }
 }
