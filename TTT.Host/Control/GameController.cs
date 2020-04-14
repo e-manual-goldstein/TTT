@@ -20,7 +20,7 @@ namespace TTT.Host.Control
         public void TakeTurn(TurnCommand turnCommand)
         {
             _logger.Log($"Player: {turnCommand.PlayerId} takes turn {turnCommand.Cell}");
-            _gameGrid.GameCells[turnCommand.Cell.I, turnCommand.Cell.J].UpdateValue(turnCommand.Cell.Marker.Value);
+            _gameGrid.TakePlayerTurn(turnCommand.PlayerId, turnCommand.Cell);
         }
     }
 }

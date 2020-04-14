@@ -41,6 +41,7 @@ namespace TTT.Client
             if (!gameManager.GameIsInProgress())
                 AddListenButton();
             else
+                //replace with Reconnect + GetGameState
                 AddGameGrid();
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);

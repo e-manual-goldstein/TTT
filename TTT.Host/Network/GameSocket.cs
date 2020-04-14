@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -13,15 +14,13 @@ namespace TTT.Core
     {
         Logger _logger;
         MessageHandler _messageHandler;
-        GameController _gameController;
-        CommandService _commandService;
+        ControllerManager _controllerManager;
 
-        public GameSocket(Logger logger, MessageHandler messageHandler, GameController gameController, CommandService commandService)
+        public GameSocket(Logger logger, MessageHandler messageHandler, ControllerManager controllerManager)
         {
             _logger = logger;
             _messageHandler = messageHandler;
-            _gameController = gameController;
-            _commandService = commandService;
+            _controllerManager = controllerManager;
             KeepAlive = true;
         }
 
@@ -71,6 +70,11 @@ namespace TTT.Core
             }
         }
 
+        public void Send(GameCommand command)
+        {
+            Send(JsonConvert.SerializeObject(command));
+        }
+
         public bool IsActive()
         {
             if (!KeepAlive)
@@ -111,7 +115,7 @@ namespace TTT.Core
                 _logger.Log($"Received message: {messageReceived}");
                 if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
                 {
-                    _commandService.ExecuteCommand(gameCommand);
+                    _controllerManager.ExecuteCommand(gameCommand);
                 }
                 //Broadcast(messageReceived);
             }

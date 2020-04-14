@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using TTT.Common;
 using TTT.Host;
+using System.Linq;
 
 namespace TTT.Core
 {
@@ -17,6 +18,8 @@ namespace TTT.Core
         float _screenHeight;
         Func<float> _widthFunc;
         Func<float> _heightFunc;
+        Dictionary<Guid, Marker> _players = new Dictionary<Guid, Marker>();
+        Guid _currentPlayerId;
 
         public GameGrid(float screenWidth, float screenHeight) : this()
         {
@@ -51,19 +54,29 @@ namespace TTT.Core
             }
         }
 
-        public Cell[] CreateCells()
+        public void TakePlayerTurn(Guid playerId, Cell cell)
         {
-            var cells = new List<Cell>();
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    var cell = new Cell(i, j);
-                    cells.Add(cell);
-                }
-            }
-            return cells.ToArray();
+            GameCells[cell.I, cell.J].UpdateValue(_players[playerId]);
         }
+
+        public void StartRandomPlayer()
+        {
+            _currentPlayerId = _players.Keys.First();
+        }
+
+        //public Cell[] CreateCells()
+        //{
+        //    var cells = new List<Cell>();
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        for (int j = 0; j < 3; j++)
+        //        {
+        //            var cell = new Cell(i, j);
+        //            cells.Add(cell);
+        //        }
+        //    }
+        //    return cells.ToArray();
+        //}
 
         public Cell[,] CreateCellArray()
         {
@@ -117,7 +130,7 @@ namespace TTT.Core
             label.VerticalContentAlignment = VerticalAlignment.Center;
             Canvas.SetBottom(label, 1);
             Canvas.SetLeft(label, 1);
-            cell.UpdateValue = (newValue) => UpdateCellValue(label, newValue);
+            cell.SetUpdateValueAction((newValue) => UpdateCellValue(label, newValue));
             return label;
         }
 
@@ -127,6 +140,17 @@ namespace TTT.Core
             {
                 label.Content = newValue.ToString();
             });
+        }
+
+        public GameState GetCurrentState()
+        {
+            return new GameState(_currentPlayerId, _allCells);
+        }
+
+        public void AddPlayerToGame(Guid playerId)
+        {
+            var marker = !_players.Any() ? Marker.X : Marker.O;
+            _players[playerId] = marker;
         }
     }   
 }

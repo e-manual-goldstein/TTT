@@ -44,7 +44,7 @@ namespace TTT.Client
             return cells.ToArray();
         }
 
-        public void DrawCells(MainActivity context)
+        public void DrawCells(Activity context, GameState gameState = null)
         {
             var displayMetrics = context.Resources.DisplayMetrics;
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
@@ -61,10 +61,15 @@ namespace TTT.Client
                 button.SetBackgroundColor(Color.Gray);
                 button.SetTextColor(Color.White);
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-                button.Text = cell.Marker.ToString();
+                button.Text = gameState == null ? null : GetCellFromState(cell, gameState).ToString();
                 button.Click += cell.ClickCell;
                 FrameLayout.AddView(button);
             }
+        }
+
+        private Marker? GetCellFromState(Cell cell, GameState gameState)
+        {
+            return gameState.Cells[cell.I, cell.J].Marker;
         }
     }   
 }

@@ -16,6 +16,5 @@ namespace TTT.Common
 
         public Cell Cell { get; set; }
 
-        public Type CommandType => GetType();
     }
 }

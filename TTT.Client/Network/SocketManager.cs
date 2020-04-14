@@ -12,6 +12,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using TTT.Common;
+using WebSocket4Net;
 
 namespace TTT.Client
 {
@@ -19,13 +20,14 @@ namespace TTT.Client
     {
         HostSocket _hostSocket;
         Logger _logger;
+        ControllerManager _controllerManager;
 
-        public SocketManager(Logger logger)
+        public SocketManager(Logger logger, ControllerManager controllerManager)
         {
             _logger = logger;
+            _controllerManager = controllerManager;
         }
 
-        //public async Task Listen(object sender, EventArgs e)
         public async Task Listen(MainActivity mainActivity)
         {
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
@@ -38,12 +40,20 @@ namespace TTT.Client
                         var message = UdpMessage.FromByteArray(task.Result.Buffer);
                         if (Guid.TryParse(message.Payload, out Guid clientId))
                         {
-                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, _logger, clientId);
+                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage));
                             _hostSocket.Send($"{clientId}");
-                            mainActivity.AsyncAddGameGrid();
+                            //mainActivity.AsyncAddGameGrid();
                         }
                     });
             }
+        }
+
+        protected void processMessage(object sender, MessageReceivedEventArgs eventArgs)
+        {
+            if (GameCommand.TryParse(eventArgs.Message, out var gameCommand))
+                _controllerManager.ExecuteCommand(gameCommand);
+            else
+                _logger.Log(eventArgs.Message);
         }
 
         public HostSocket HostSocket => _hostSocket;

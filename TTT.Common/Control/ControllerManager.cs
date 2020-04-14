@@ -6,14 +6,14 @@ using System.Text;
 
 namespace TTT.Common
 {
-    public class CommandService
+    public class ControllerManager
     {
         IServiceProvider _serviceProvider;
         Logger _logger;
         Type[] _controllerTypes;
         Dictionary<Type, MethodInfo> _actionDictionary = new Dictionary<Type, MethodInfo>();
 
-        public CommandService(IServiceProvider serviceProvider, Logger logger, Type[] controllerTypes)
+        public ControllerManager(IServiceProvider serviceProvider, Logger logger, Type[] controllerTypes)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;

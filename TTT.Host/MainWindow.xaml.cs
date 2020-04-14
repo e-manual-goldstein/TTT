@@ -28,23 +28,41 @@ namespace TTT.Host
 
             gameGrid.DrawCells((float)Width, (float)Height);
             Content = gameGrid.Canvas;
-            AddTestButton(gameGrid.Canvas);
+            AddConnectButton(gameGrid.Canvas);
+            AddStartButton(gameGrid.Canvas);
         }
 
-        private void AddTestButton(Canvas canvas)
+        private void AddConnectButton(Canvas canvas)
         {
             var button = new Button();
-            button.Content = "Test";
-            button.Click += Button_Click;
+            button.Content = "Connect";
+            Canvas.SetTop(button, 20);
+            Canvas.SetLeft(button, 20);
+            button.Click += ConnectButton_Click;
             canvas.Children.Add(button);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AddStartButton(Canvas canvas)
         {
-            ButtonAction();
+            var button = new Button();
+            button.Content = "Start";
+            Canvas.SetTop(button, 20);
+            Canvas.SetLeft(button, 50);
+            button.Click += StartButton_Click;
+            canvas.Children.Add(button);
         }
 
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConnectButtonAction();
+        }
 
-        public Action ButtonAction { get; set; }
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartButtonAction();
+        }
+
+        public Action ConnectButtonAction { get; set; }
+        public Action StartButtonAction { get; set; }
     }
 }

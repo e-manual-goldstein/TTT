@@ -24,14 +24,14 @@ namespace TTT.Host
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<MainWindow>();
             services.AddSingleton<GameGrid>();
+            services.AddSingleton<MainWindow>();
             services.AddSingleton<SocketHub>();
             services.AddSingleton<MessageHandler>();
             services.AddSingleton<Logger>();
-            services.AddSingleton<CommandService>(provider =>
+            services.AddSingleton<ControllerManager>(provider =>
             {
-                return new CommandService(provider, provider.GetService<Logger>(), new Type[]
+                return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
                 {
                     typeof(GameController)
                 });
@@ -43,12 +43,23 @@ namespace TTT.Host
         {
             var socketHub = _serviceProvider.GetService<SocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
+            var game = _serviceProvider.GetService<GameGrid>();
                 
-            mainWindow.ButtonAction = async () =>
+            mainWindow.ConnectButtonAction = async () =>
             {
-                var socketId = await socketHub.ConnectAsync();
-                await socketHub.OpenConnectionAsync(socketId);
+                var playerId = await socketHub.ConnectAsync();
+                game.AddPlayerToGame(playerId);
+                await socketHub.OpenConnectionAsync(playerId);
             };
+
+            mainWindow.StartButtonAction = () =>
+            {
+                game.StartRandomPlayer();
+                var gameState = game.GetCurrentState();
+                var subCommand = new UpdateStateCommand(gameState, true);
+                socketHub.BroadcastCommand(new GameCommand(subCommand));
+            };
+
             mainWindow.Show();
         }
 

@@ -46,14 +46,15 @@ namespace TTT.Client
             services.AddSingleton<SocketManager>();
             services.AddSingleton<GameManager>();
             services.AddSingleton<MessageHandler>();
-            services.AddSingleton<CommandService>(provider =>
+            services.AddSingleton<ControllerManager>(provider =>
             {
-                return new CommandService(provider, provider.GetService<Logger>(), new Type[]
+                return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
                 {
-
+                    typeof(StateController)
                 });
             });
             services.AddSingleton<ActionService>();
+            services.AddScoped<StateController>();
         }
 
         internal void RegisterMainActivity(MainActivity mainActivity)

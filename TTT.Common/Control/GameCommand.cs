@@ -26,5 +26,19 @@ namespace TTT.Common
         {
             return JsonConvert.DeserializeObject(SubCommandString, CommandType) as ISubCommand;
         }
+
+        public static bool TryParse(string message, out GameCommand gameCommand)
+        {
+            try
+            {
+                gameCommand = JsonConvert.DeserializeObject<GameCommand>(message);
+                return gameCommand != null;
+            }
+            catch (Exception ex)
+            {
+                gameCommand = null;
+                return false;
+            }
+        }
     }
 }
