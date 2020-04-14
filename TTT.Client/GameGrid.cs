@@ -8,6 +8,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using TTT.Common;
@@ -16,19 +17,13 @@ namespace TTT.Client
 {
     public class GameGrid
     {
-        Context _context;
         Cell[] _allCells;
         float _screenWidth;
         float _screenHeight;
-        Func<float> _widthFunc;
-        Func<float> _heightFunc;
 
 
-        public GameGrid(Context context, ActionService actionService, Func<float> widthFunc, Func<float> heightFunc)
+        public GameGrid(ActionService actionService)
         {
-            _context = context;
-            _widthFunc = widthFunc;
-            _heightFunc = heightFunc;
             _allCells = CreateCells(actionService);
         }
 
@@ -49,14 +44,15 @@ namespace TTT.Client
             return cells.ToArray();
         }
 
-        public void DrawCells()
+        public void DrawCells(MainActivity context)
         {
+            var displayMetrics = context.Resources.DisplayMetrics;
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-            var baseX = (_widthFunc() - (3 * Constants.CellSizeClient)) / 2;
-            var baseY = (_heightFunc() - (3 * Constants.CellSizeClient)) / 2;
+            var baseX = (displayMetrics.WidthPixels - (3 * Constants.CellSizeClient)) / 2;
+            var baseY = (displayMetrics.HeightPixels - (3 * Constants.CellSizeClient)) / 2;
             foreach (var cell in _allCells)
             {
-                var button = new Button(_context);
+                var button = new Button(context);
                 button.LayoutParameters = baseLayout;
                 var x = baseX + (cell.I * Constants.CellSizeClient);
                 var y = baseY + (cell.J * Constants.CellSizeClient);
@@ -69,11 +65,6 @@ namespace TTT.Client
                 button.Click += cell.ClickCell;
                 FrameLayout.AddView(button);
             }
-        }
-
-        public void TakeTurn(Cell cell)
-        {
-
         }
     }   
 }

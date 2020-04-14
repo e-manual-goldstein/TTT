@@ -14,19 +14,21 @@ namespace TTT.Client
     {
         IPAddress _serverAddress;
         Logger _logger;
+        Guid _clientId;
 
         bool _isOpen;
 
-        public HostSocket(IPAddress serverAddress, Logger logger, bool openSocket = false)
+        public HostSocket(IPAddress serverAddress, Logger logger, Guid clientId, bool openSocket = false)
         {
             _serverAddress = serverAddress;
             _logger = logger;
+            _clientId = clientId;
             if (openSocket)
                 openWebSocket();
         }
 
         public bool IsOpen => _isOpen;
-
+        public Guid ClientId => _clientId;
         public void Send(GameCommand command)
         {
             Send(JsonConvert.SerializeObject(command));

@@ -66,10 +66,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionService.cs" />
+    <Compile Include="Activities\ActivityManager.cs" />
+    <Compile Include="App.cs" />
     <Compile Include="GameGrid.cs" />
-    <Compile Include="MainActivity.cs" />
+    <Compile Include="GameManager.cs" />
+    <Compile Include="Activities\MainActivity.cs" />
     <Compile Include="Network\HostSocket.cs" />
     <Compile Include="Network\Receiver.cs" />
+    <Compile Include="Network\SocketManager.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestLayout.cs" />
@@ -117,6 +121,12 @@
   <ItemGroup>
     <PackageReference Include="CocosSharp">
       <Version>1.7.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
+      <Version>3.1.3</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <Version>3.1.3</Version>
     </PackageReference>
     <PackageReference Include="WebSocket4Net">
       <Version>0.15.2</Version>

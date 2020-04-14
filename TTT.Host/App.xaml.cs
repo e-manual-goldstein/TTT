@@ -43,12 +43,12 @@ namespace TTT.Host
         {
             var socketHub = _serviceProvider.GetService<SocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
+                
             mainWindow.ButtonAction = async () =>
             {
                 var socketId = await socketHub.ConnectAsync();
                 await socketHub.OpenConnectionAsync(socketId);
             };
-
             mainWindow.Show();
         }
 

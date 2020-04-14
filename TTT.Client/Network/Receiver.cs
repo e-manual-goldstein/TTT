@@ -15,6 +15,7 @@ using TTT.Common;
 
 namespace TTT.Client
 {
+    [Obsolete]
     public class Receiver
     {
         public Receiver(Guid clientId, Logger logger)
