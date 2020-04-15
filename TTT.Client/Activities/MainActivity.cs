@@ -42,7 +42,7 @@ namespace TTT.Client
                 AddListenButton();
             else
                 //replace with Reconnect + GetGameState
-                AddGameGrid();
+                AddGameGrid(new GameState(Guid.NewGuid(), null));
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
         }
@@ -74,20 +74,25 @@ namespace TTT.Client
         private void EventListener(object sender, EventArgs e)
         {
             var socketManager = App.Current.ServiceProvider.GetService<SocketManager>();
-            RunOnUiThread(async () => await socketManager.Listen(this));
+            var playerManager = App.Current.ServiceProvider.GetService<PlayerManager>();
+            RunOnUiThread(async () => {
+                var playerId = await socketManager.Listen(this);
+                playerManager.SetPlayerId(playerId);
+            });
         }
 
-        public void AsyncAddGameGrid()
-        {
-            RunOnUiThread(() => AddGameGrid());
-        }
-        public void AddGameGrid()
+        //public void AsyncAddGameGrid()
+        //{
+        //    RunOnUiThread(() => AddGameGrid());
+        //}
+
+        public void AddGameGrid(GameState gameState)
         {
             var gameManager = App.Current.ServiceProvider.GetService<GameManager>();
             var game = gameManager.GetGame();
 
             game.FrameLayout = new FrameLayout(this);
-            game.DrawCells(this);
+            game.DrawCells(this, gameState);
             ReloadView(game.FrameLayout);
         }
     }

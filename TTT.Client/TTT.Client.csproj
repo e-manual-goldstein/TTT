@@ -74,6 +74,7 @@
     <Compile Include="Network\HostSocket.cs" />
     <Compile Include="Network\Receiver.cs" />
     <Compile Include="Network\SocketManager.cs" />
+    <Compile Include="PlayerManager.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateController.cs" />

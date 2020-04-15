@@ -18,13 +18,15 @@ namespace TTT.Client
     public class GameGrid
     {
         Cell[] _allCells;
+        PlayerManager _playerManager;
         float _screenWidth;
         float _screenHeight;
 
 
-        public GameGrid(ActionService actionService)
+        public GameGrid(ActionService actionService, PlayerManager playerManager)
         {
             _allCells = CreateCells(actionService);
+            _playerManager = playerManager;
         }
 
         public FrameLayout FrameLayout { get; set; }
@@ -37,14 +39,14 @@ namespace TTT.Client
                 for (int j = 0; j < 3; j++)
                 {
                     var cell = new Cell(i, j);
-                    cell.TakeTurnAction = (c) => actionService.TakeTurn(c);
+                    cell.SetTakeTurnAction((c) => actionService.TakeTurn(c));
                     cells.Add(cell);
                 }
             }
             return cells.ToArray();
         }
 
-        public void DrawCells(Activity context, GameState gameState = null)
+        public void DrawCells(Activity context, GameState gameState)
         {
             var displayMetrics = context.Resources.DisplayMetrics;
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
@@ -58,11 +60,12 @@ namespace TTT.Client
                 var y = baseY + (cell.J * Constants.CellSizeClient);
                 button.SetX(x);
                 button.SetY(y);
-                button.SetBackgroundColor(Color.Gray);
+                button.SetBackgroundColor(cell.Active ? Color.Red : Color.Gray);
                 button.SetTextColor(Color.White);
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
                 button.Text = gameState == null ? null : GetCellFromState(cell, gameState).ToString();
-                button.Click += cell.ClickCell;
+                if (_playerManager.IsMyTurn(gameState))
+                    button.Click += cell.ClickCell;
                 FrameLayout.AddView(button);
             }
         }

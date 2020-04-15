@@ -12,6 +12,7 @@ using System.Windows;
 using TTT.Common;
 using TTT.Core;
 using TTT.Host.Control;
+using TTT.Host.Events;
 
 namespace TTT.Host
 {
@@ -44,7 +45,8 @@ namespace TTT.Host
             var socketHub = _serviceProvider.GetService<SocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
             var game = _serviceProvider.GetService<GameGrid>();
-                
+            game.TurnTaken += TurnTaken;
+            game.EndGame += EndGame;
             mainWindow.ConnectButtonAction = async () =>
             {
                 var playerId = await socketHub.ConnectAsync();
@@ -55,12 +57,30 @@ namespace TTT.Host
             mainWindow.StartButtonAction = () =>
             {
                 game.StartRandomPlayer();
+                game.StartAtEndGame();
                 var gameState = game.GetCurrentState();
                 var subCommand = new UpdateStateCommand(gameState, true);
                 socketHub.BroadcastCommand(new GameCommand(subCommand));
             };
 
             mainWindow.Show();
+        }
+
+        private void TurnTaken(object sender, EventArgs eventArgs)
+        {
+            var socketHub = _serviceProvider.GetService<SocketHub>();
+            var game = sender as GameGrid;
+            var gameState = game.GetCurrentState();
+            var subCommand = new UpdateStateCommand(gameState, false);
+            socketHub.BroadcastCommand(new GameCommand(subCommand));
+        }
+
+        private void EndGame(object sender, EndGameEventArgs eventArgs)
+        {
+            foreach (var cell in eventArgs.WinningSet)
+            {
+                cell.Active = true;
+            }
         }
 
         public App()

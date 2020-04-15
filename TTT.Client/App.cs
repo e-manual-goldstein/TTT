@@ -42,6 +42,7 @@ namespace TTT.Client
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<Logger>();
+            services.AddSingleton<PlayerManager>();
             services.AddSingleton<ActivityManager>();
             services.AddSingleton<SocketManager>();
             services.AddSingleton<GameManager>();
@@ -55,6 +56,7 @@ namespace TTT.Client
             });
             services.AddSingleton<ActionService>();
             services.AddScoped<StateController>();
+            services.AddScoped<GameGrid>();
         }
 
         internal void RegisterMainActivity(MainActivity mainActivity)

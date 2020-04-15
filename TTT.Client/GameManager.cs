@@ -34,7 +34,7 @@ namespace TTT.Client
             {
                 return _game;
             }
-            return _game = new GameGrid(_serviceProvider.GetService<ActionService>());
+            return _game = _serviceProvider.GetService<GameGrid>();
         }
 
         public void LoadGame(GameState gameState, bool isNewGame = false)
@@ -42,7 +42,7 @@ namespace TTT.Client
             _gameState = gameState;
             if (isNewGame)
             {
-                _game = new GameGrid(_serviceProvider.GetService<ActionService>());
+                _game = _serviceProvider.GetService<GameGrid>();
             }
             var currentActivity = _activityManager.GetCurrentActivity();
             _game.FrameLayout = new FrameLayout(currentActivity);

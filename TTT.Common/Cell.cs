@@ -10,6 +10,7 @@ namespace TTT.Common
         public int I;
         public int J;
         public static Marker Turn = Common.Marker.X;
+        
 
         public Cell(int i, int j, Marker? marker = null)
         {
@@ -19,12 +20,14 @@ namespace TTT.Common
         }
 
         public Marker? Marker { get; set; }
+        
+        public bool Active { get; set; }
 
         public void ClickCell(object sender, EventArgs e)
         {
             if (Marker == null)
             {
-                TakeTurnAction(this);
+                _takeTurnAction(this);
             }
         }
 
@@ -42,11 +45,15 @@ namespace TTT.Common
 
         public void UpdateValue(Marker marker)
         {
+            Marker = marker;
             _updateValueAction(marker);
         }
 
-        public Action<Cell> TakeTurnAction { internal get; set; }
-
+        Action<Cell> _takeTurnAction;
+        public void SetTakeTurnAction(Action<Cell> action)
+        {
+            _takeTurnAction = action;
+        }
 
         public void SwapTurn()
         {

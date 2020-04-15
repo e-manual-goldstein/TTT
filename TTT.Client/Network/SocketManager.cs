@@ -28,23 +28,24 @@ namespace TTT.Client
             _controllerManager = controllerManager;
         }
 
-        public async Task Listen(MainActivity mainActivity)
+        public async Task<Guid> Listen(MainActivity mainActivity)
         {
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
-
+            Guid clientId = Guid.Empty;
             using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
             {
-                while (_hostSocket == null)
+                if (_hostSocket == null || !_hostSocket.IsOpen)
                     await listener.ReceiveAsync().ContinueWith(task =>
                     {
                         var message = UdpMessage.FromByteArray(task.Result.Buffer);
-                        if (Guid.TryParse(message.Payload, out Guid clientId))
+                        if (Guid.TryParse(message.Payload, out clientId))
                         {
                             _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage));
                             _hostSocket.Send($"{clientId}");
                             //mainActivity.AsyncAddGameGrid();
                         }
                     });
+                return clientId;
             }
         }
 
