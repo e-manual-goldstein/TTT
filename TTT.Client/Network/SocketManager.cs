@@ -40,11 +40,11 @@ namespace TTT.Client
                         var message = UdpMessage.FromByteArray(task.Result.Buffer);
                         if (Guid.TryParse(message.Payload, out clientId))
                         {
-                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage));
-                            _hostSocket.Send($"{clientId}");
+                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage), true);
                             //mainActivity.AsyncAddGameGrid();
                         }
                     });
+                _hostSocket.Send($"{clientId}");
                 return clientId;
             }
         }

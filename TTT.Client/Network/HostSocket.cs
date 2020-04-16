@@ -58,10 +58,19 @@ namespace TTT.Client
             webSocketClient.Opened += new EventHandler(webSocketClient_Opened);
             webSocketClient.Closed += new EventHandler(webSocketClient_Closed);
             webSocketClient.MessageReceived += eventHandler;
-            //webSocketClient.MessageReceived += WebSocketClient_MessageReceived;
-            //webSocketClient.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
+            webSocketClient.Error += webSocketClient_Error;
             webSocketClient.Open();
             return webSocketClient;
+        }
+
+        protected void webSocketClient_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
+        {
+            foreach (var item in Connectivity.ConnectionProfiles)
+            {
+                Console.Write(item.ToString());
+            }
+            Console.WriteLine(Connectivity.NetworkAccess);
+            Console.WriteLine(e.Exception);
         }
 
         protected void webSocketClient_Closed(object sender, EventArgs e)

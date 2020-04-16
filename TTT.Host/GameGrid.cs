@@ -106,7 +106,7 @@ namespace TTT.Core
 
         private Cell[] GetWinningSet()
         {
-            return _sets.Where(s => Math.Abs(s.Sum(c => (int)c.Marker)) == 3).First();
+            return _sets.Where(s => Math.Abs(s.Sum(c => (int)(c.Marker ?? 0))) == 3).First();
         }
 
         public EventHandler TurnTaken { get; set; }
