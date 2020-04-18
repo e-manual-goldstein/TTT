@@ -23,7 +23,7 @@ namespace TTT.Client
             _messageHandler = messageHandler;
             _clientId = clientId;
             if (openSocket)
-                openWebSocket(_messageHandler);
+                _webSocket = openWebSocket(_messageHandler);
         }
 
         public bool IsOpen => _isOpen;
@@ -65,11 +65,6 @@ namespace TTT.Client
 
         protected void webSocketClient_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
         {
-            foreach (var item in Connectivity.ConnectionProfiles)
-            {
-                Console.Write(item.ToString());
-            }
-            Console.WriteLine(Connectivity.NetworkAccess);
             Console.WriteLine(e.Exception);
         }
 

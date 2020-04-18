@@ -75,10 +75,13 @@ namespace TTT.Client
         {
             var socketManager = App.Current.ServiceProvider.GetService<SocketManager>();
             var playerManager = App.Current.ServiceProvider.GetService<PlayerManager>();
-            RunOnUiThread(async () => {
-                var playerId = await socketManager.Listen(this);
-                playerManager.SetPlayerId(playerId);
-            });
+            if (socketManager.HostSocket ==  null || !socketManager.HostSocket.IsOpen)
+            {
+                RunOnUiThread(async () => {
+                    var playerId = await socketManager.Listen(this);
+                    playerManager.SetPlayerId(playerId);
+                });
+            }
         }
 
         //public void AsyncAddGameGrid()

@@ -63,20 +63,26 @@ namespace TTT.Core
         public async Task<Guid> ConnectAsync()
         {
             _logger.Log($"Accepting Clients");
-            // Create CancellationTokenSource.
             var source = new CancellationTokenSource();
             var socketId = Guid.NewGuid();
-            var client = _server.AcceptTcpClientAsync().ContinueWith(task =>
+            var clientId = BeginListening(socketId, source);
+            BroadcastInvitation(socketId, source.Token);
+            return await clientId;
+        }
+
+        public async Task<Guid> BeginListening(Guid socketId, CancellationTokenSource source)
+        {
+            await _server.AcceptTcpClientAsync().ContinueWith(async task => 
             {
                 _logger.Log($"Connecting Socket");
                 _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _controllerManager);
                 _activeSockets[socketId].Client = task.Result;
                 _logger.Log("Cancelling Token");
+                await OpenConnectionAsync(socketId);
                 source.Cancel();
-                return socketId;
+                return;
             });
-            BroadcastInvitation(socketId, source.Token);
-            return await client;
+            return socketId;
         }
 
         private void BroadcastInvitation(Guid socketId, CancellationToken cancellationToken)
@@ -90,6 +96,7 @@ namespace TTT.Core
                     {
                         //TEST THIS
                         broadcaster.Send(new UdpMessage(socketId.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                        //Change this to Async? lol
                         Thread.Sleep(1000);
                     }
                     _logger.Log("Stopped Pinging...");

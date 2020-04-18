@@ -21,6 +21,7 @@ namespace TTT.Client
         HostSocket _hostSocket;
         Logger _logger;
         ControllerManager _controllerManager;
+        bool _listening;
 
         public SocketManager(Logger logger, ControllerManager controllerManager)
         {
@@ -30,6 +31,7 @@ namespace TTT.Client
 
         public async Task<Guid> Listen(MainActivity mainActivity)
         {
+            _listening = true;
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
             Guid clientId = Guid.Empty;
             using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
@@ -41,10 +43,11 @@ namespace TTT.Client
                         if (Guid.TryParse(message.Payload, out clientId))
                         {
                             _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage), true);
+                            _listening = false;
                             //mainActivity.AsyncAddGameGrid();
                         }
                     });
-                _hostSocket.Send($"{clientId}");
+                //_hostSocket.Send($"{clientId}");
                 return clientId;
             }
         }

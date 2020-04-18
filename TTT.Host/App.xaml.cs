@@ -51,7 +51,7 @@ namespace TTT.Host
             {
                 var playerId = await socketHub.ConnectAsync();
                 game.AddPlayerToGame(playerId);
-                await socketHub.OpenConnectionAsync(playerId);
+                //await socketHub.OpenConnectionAsync(playerId);
             };
 
             mainWindow.StartButtonAction = () =>
@@ -61,6 +61,11 @@ namespace TTT.Host
                 var gameState = game.GetCurrentState();
                 var subCommand = new UpdateStateCommand(gameState, true);
                 socketHub.BroadcastCommand(new GameCommand(subCommand));
+            };
+
+            mainWindow.TestButtonAction = async () =>
+            {
+                await socketHub.BeginListening(Guid.NewGuid(), new System.Threading.CancellationTokenSource());
             };
 
             mainWindow.Show();

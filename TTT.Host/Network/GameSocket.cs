@@ -112,6 +112,11 @@ namespace TTT.Core
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
+                if (DateTime.TryParse(messageReceived, out DateTime pingResult))
+                {
+                    _logger.Log($"Pinged: {pingResult}");
+                    return;
+                }
                 _logger.Log($"Received message: {messageReceived}");
                 if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
                 {
