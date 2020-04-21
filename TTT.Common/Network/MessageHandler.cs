@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,20 +18,15 @@ namespace TTT.Common
 
         public bool TryParse(string message, out GameCommand gameCommand)
         {
-            try
-            {
-                gameCommand = JsonConvert.DeserializeObject<GameCommand>(message);
-                return gameCommand != null;
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"{ex}");
-                gameCommand = null;
-                return false;
-            }
+            gameCommand = JsonConvert.DeserializeObject<GameCommand>(message, new JsonSerializerSettings() { Error = ErrorHandler });
+            return gameCommand != null;
         }
 
-        
+        private void ErrorHandler(object sender, ErrorEventArgs eventArgs)
+        {
+            eventArgs.ErrorContext.Handled = true;
+            _logger.Warning($"{sender}");
+        }
 
     }
 }

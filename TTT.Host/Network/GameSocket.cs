@@ -101,20 +101,20 @@ namespace TTT.Core
             }
             else if (msglen == 127)
             {
-                _logger.Log("TODO: msglen == 127, needs qword to store msglen");
+                _logger.Warning("TODO: msglen == 127, needs qword to store msglen");
                 // i don't really know the byte order, please edit this
                 // msglen = BitConverter.ToUInt64(new byte[] { bytes[5], bytes[4], bytes[3], bytes[2], bytes[9], bytes[8], bytes[7], bytes[6] }, 0);
                 // offset = 10;
             }
 
             if (msglen == 0)
-                _logger.Log("msglen == 0");
+                _logger.Warning("msglen == 0");
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
                 if (DateTime.TryParse(messageReceived, out DateTime pingResult))
                 {
-                    _logger.Log($"Pinged: {pingResult}");
+                    _logger.Warning($"Pinged: {pingResult}");
                     return;
                 }
                 _logger.Log($"Received message: {messageReceived}");
@@ -125,7 +125,7 @@ namespace TTT.Core
                 //Broadcast(messageReceived);
             }
             else
-                _logger.Log("mask bit not set");
+                _logger.Warning("mask bit not set");
         }
 
         private string decodeMessage(byte[] bytes, int offset, int msglen)

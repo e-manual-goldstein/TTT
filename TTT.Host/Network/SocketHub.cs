@@ -147,7 +147,7 @@ namespace TTT.Core
             server.Start();
             if (_activeSockets.ContainsKey(id))
             {
-                _logger.Log("Found connection for same Id, disposing old connection");
+                _logger.Warning("Found connection for same Id, disposing old connection");
                 _activeSockets[id].Kill();
             }
             _activeSockets[id] = new GameSocket(_logger, _messageHandler, _controllerManager);
