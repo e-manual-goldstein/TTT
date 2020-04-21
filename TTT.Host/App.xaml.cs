@@ -65,7 +65,8 @@ namespace TTT.Host
 
             mainWindow.TestButtonAction = async () =>
             {
-                await socketHub.BeginListening(Guid.NewGuid(), new System.Threading.CancellationTokenSource());
+                var playerId = await socketHub.ConnectAsync(true);
+                game.AddPlayerToGame(playerId);
             };
 
             mainWindow.Show();

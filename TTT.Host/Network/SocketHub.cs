@@ -60,13 +60,16 @@ namespace TTT.Core
 
         #region Connect to Clients
 
-        public async Task<Guid> ConnectAsync()
+        public async Task<Guid> ConnectAsync(bool useThreading = false)
         {
             _logger.Log($"Accepting Clients");
             var source = new CancellationTokenSource();
             var socketId = Guid.NewGuid();
             var clientId = BeginListening(socketId, source);
-            BroadcastInvitation(socketId, source.Token);
+            if (useThreading) 
+                BroadcastInvitationOnThread(socketId, source.Token);
+            else
+                BroadcastInvitationAsTask(socketId, source.Token);
             return await clientId;
         }
 
@@ -78,14 +81,20 @@ namespace TTT.Core
                 _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _controllerManager);
                 _activeSockets[socketId].Client = task.Result;
                 _logger.Log("Cancelling Token");
-                await OpenConnectionAsync(socketId);
                 source.Cancel();
+                await OpenConnectionAsync(socketId);
                 return;
             });
             return socketId;
         }
 
-        private void BroadcastInvitation(Guid socketId, CancellationToken cancellationToken)
+        private void BroadcastInvitationOnThread(Guid socketId, CancellationToken cancellationToken)
+        {
+            var pinger = new Pinger() { SocketId = socketId, CancellationToken = cancellationToken};
+            ThreadPool.QueueUserWorkItem((p) => SendPing(p), pinger, false);
+        }
+
+        private void BroadcastInvitationAsTask(Guid socketId, CancellationToken cancellationToken)
         {
             Task.Run(() =>
             {
@@ -97,11 +106,35 @@ namespace TTT.Core
                         //TEST THIS
                         broadcaster.Send(new UdpMessage(socketId.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
                         //Change this to Async? lol
-                        Thread.Sleep(1000);
+
                     }
                     _logger.Log("Stopped Pinging...");
                 }
             }, cancellationToken);
+        }
+
+        public class Pinger
+        {
+            public Guid SocketId { get; set; }
+            public CancellationToken CancellationToken { get; set; }
+        }
+        private void SendPing(Pinger input)
+        {
+            Pinger pinger = input;
+            CancellationToken cancellationToken = pinger.CancellationToken;
+            Guid socketId = pinger.SocketId;
+            using (var broadcaster = new UdpClient() { EnableBroadcast = true })
+            {
+                _logger.Log($"Pinging client...");
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    //TEST THIS
+                    broadcaster.Send(new UdpMessage(socketId.ToString()), new IPEndPoint(IPAddress.Broadcast, Constants.SERVER_LISTEN_PORT));
+                    //Change this to Async? lol
+
+                }
+                _logger.Log("Stopped Pinging...");
+            }
         }
 
         #endregion
