@@ -25,7 +25,7 @@ namespace TTT.Host
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<GameGrid>();
+            services.AddSingleton<Game>();
             services.AddSingleton<MainWindow>();
             services.AddSingleton<SocketHub>();
             services.AddSingleton<MessageHandler>();
@@ -44,7 +44,7 @@ namespace TTT.Host
         {
             var socketHub = _serviceProvider.GetService<SocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
-            var game = _serviceProvider.GetService<GameGrid>();
+            var game = _serviceProvider.GetService<Game>();
             game.TurnTaken += TurnTaken;
             game.EndGame += EndGame;
             mainWindow.ConnectButtonAction = async () =>
@@ -75,7 +75,7 @@ namespace TTT.Host
         private void TurnTaken(object sender, EventArgs eventArgs)
         {
             var socketHub = _serviceProvider.GetService<SocketHub>();
-            var game = sender as GameGrid;
+            var game = sender as Game;
             var gameState = game.GetCurrentState();
             var subCommand = new UpdateStateCommand(gameState, false);
             socketHub.BroadcastCommand(new GameCommand(subCommand));

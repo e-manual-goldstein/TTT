@@ -10,17 +10,17 @@ namespace TTT.Host.Control
 {
     public class GameController : AbstractController
     {
-        GameGrid _gameGrid;
+        Game _game;
 
-        public GameController(GameGrid gameGrid, Logger logger) : base(logger)
+        public GameController(Game game, Logger logger) : base(logger)
         {
-            _gameGrid = gameGrid;
+            _game = game;
         }
 
         public void TakeTurn(TurnCommand turnCommand)
         {
             _logger.Log($"Player: {turnCommand.PlayerId} takes turn {turnCommand.Cell}");
-            _gameGrid.TakePlayerTurn(turnCommand.PlayerId, turnCommand.Cell);
+            _game.TakePlayerTurn(turnCommand.PlayerId, turnCommand.Cell);
         }
     }
 }

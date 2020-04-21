@@ -12,7 +12,7 @@ using TTT.Host.Events;
 
 namespace TTT.Core
 {
-    public class GameGrid
+    public class Game
     {
         Cell[,] _cellGrid;
         List<Cell> _allCells = new List<Cell>();
@@ -24,7 +24,7 @@ namespace TTT.Core
         Dictionary<Guid, Marker> _players = new Dictionary<Guid, Marker>();
         Guid _currentPlayerId;
 
-        public GameGrid(float screenWidth, float screenHeight) : this()
+        public Game(float screenWidth, float screenHeight) : this()
         {
             
             _screenWidth = screenWidth;
@@ -35,13 +35,13 @@ namespace TTT.Core
             
         }
 
-        public GameGrid(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
+        public Game(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
         {
             _widthFunc = widthFunc;
             _heightFunc = heightFunc;
         }
 
-        public GameGrid()
+        public Game()
         {
             _cellGrid = CreateCellArray();
             _sets = CreateSets().ToArray();

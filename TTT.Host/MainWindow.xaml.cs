@@ -21,16 +21,16 @@ namespace TTT.Host
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow(GameGrid gameGrid)
+        public MainWindow(Game game)
         {
             InitializeComponent();
 
 
-            gameGrid.DrawCells((float)Width, (float)Height);
-            Content = gameGrid.Canvas;
-            AddConnectButton(gameGrid.Canvas);
-            AddStartButton(gameGrid.Canvas);
-            AddTestButton(gameGrid.Canvas);
+            game.DrawCells((float)Width, (float)Height);
+            Content = game.Canvas;
+            AddConnectButton(game.Canvas);
+            AddStartButton(game.Canvas);
+            AddTestButton(game.Canvas);
         }
 
         private void AddConnectButton(Canvas canvas)
