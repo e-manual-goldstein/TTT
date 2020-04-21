@@ -6,7 +6,6 @@ using System.Net;
 using System.Threading;
 using TTT.Common;
 using WebSocket4Net;
-using Xamarin.Essentials;
 
 namespace TTT.Client
 {
