@@ -64,7 +64,7 @@ namespace TTT.Core
                 }
                 catch
                 {
-                    Output.Debug("Lost Connection. Terminating Socket");
+                    //Output.Debug("Lost Connection. Terminating Socket");
                     Kill();
                 }
             }
