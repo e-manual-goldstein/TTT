@@ -10,10 +10,11 @@ using TTT.Host;
 using System.Linq;
 using TTT.Host.Events;
 
-namespace TTT.Core
+namespace TTT.Host
 {
     public class Game
     {
+        Guid _gameId;
         Cell[,] _cellGrid;
         List<Cell> _allCells = new List<Cell>();
         Cell[][] _sets;
@@ -24,28 +25,34 @@ namespace TTT.Core
         Dictionary<Guid, Marker> _players = new Dictionary<Guid, Marker>();
         Guid _currentPlayerId;
 
-        public Game(float screenWidth, float screenHeight) : this()
-        {
-            
-            _screenWidth = screenWidth;
-            _screenHeight = screenHeight;
-            Canvas = new Canvas();
-            Canvas.Width = screenWidth;
-            Canvas.Height = screenHeight;
-            
-        }
+        EventHandler _turnTaken;
+        EventHandler<EndGameEventArgs> _endGame;
 
-        public Game(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
-        {
-            _widthFunc = widthFunc;
-            _heightFunc = heightFunc;
-        }
+        //public Game(float screenWidth, float screenHeight) : this()
+        //{
 
-        public Game()
+        //    _screenWidth = screenWidth;
+        //    _screenHeight = screenHeight;
+        //    Canvas = new Canvas();
+        //    Canvas.Width = screenWidth;
+        //    Canvas.Height = screenHeight;
+
+        //}
+
+        //public Game(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
+        //{
+        //    _widthFunc = widthFunc;
+        //    _heightFunc = heightFunc;
+        //}
+
+        public Game(Guid gameId, EventHandler turnTakenEventHandler, EventHandler<EndGameEventArgs> endGameEventHandler)
         {
+            _gameId = gameId;
+            _turnTaken += turnTakenEventHandler;
+            _endGame += endGameEventHandler;
             _cellGrid = CreateCellArray();
             _sets = CreateSets().ToArray();
-            Canvas = new Canvas();
+            //Canvas = new Canvas();
         }
 
         private List<Cell[]> CreateSets()
@@ -58,7 +65,7 @@ namespace TTT.Core
             return cells;
         }
 
-        public Canvas Canvas { get; set; }
+        //public Canvas Canvas { get; set; }
 
         public Cell[,] GameCells 
         {
@@ -74,13 +81,13 @@ namespace TTT.Core
             GameCells[cell.I, cell.J].UpdateValue(_players[playerId]);
             if (GameOver())
             {
-                EndGame.Invoke(this, new EndGameEventArgs() { Winner = playerId, WinningSet = GetWinningSet() });
+                _endGame.Invoke(this, new EndGameEventArgs() { Winner = playerId, WinningSet = GetWinningSet() });
                 _currentPlayerId = Guid.Empty;
             }
             else 
                 _currentPlayerId = _players.Keys.FirstOrDefault(p => p != playerId);
                 //_currentPlayerId = _players.Keys.First(p => p != playerId);
-            TurnTaken.Invoke(this, null);
+            _turnTaken.Invoke(this, null);
         }
 
         internal void StartAtEndGame()
@@ -109,24 +116,6 @@ namespace TTT.Core
             return _sets.Where(s => Math.Abs(s.Sum(c => (int)(c.Marker ?? 0))) == 3).First();
         }
 
-        public EventHandler TurnTaken { get; set; }
-
-        public EventHandler<EndGameEventArgs> EndGame { get; set; }
-
-        //public Cell[] CreateCells()
-        //{
-        //    var cells = new List<Cell>();
-        //    for (int i = 0; i < 3; i++)
-        //    {
-        //        for (int j = 0; j < 3; j++)
-        //        {
-        //            var cell = new Cell(i, j);
-        //            cells.Add(cell);
-        //        }
-        //    }
-        //    return cells.ToArray();
-        //}
-
         public Cell[,] CreateCellArray()
         {
             var cellArray = new Cell[3, 3];
@@ -141,32 +130,43 @@ namespace TTT.Core
             return cellArray;
         }
 
-
-        public void DrawCells(float width, float height)
+        public Canvas DrawCells()
         {
-            Canvas.Width = width;
-            Canvas.Height = height;
-
-            var baseX = (width - (3 * Constants.CellSizeHost)) / 2;
-            var baseY = (height - (3 * Constants.CellSizeHost)) / 2;
+            var canvas = new Canvas();
+            var canvases = new Dictionary<Cell, Canvas>();
 
             foreach (var cell in _cellGrid)
             {
-                var cellCanvas = DrawCell(cell, baseX, baseY);
-                Canvas.Children.Add(cellCanvas);
+                canvases[cell] = DrawCell(cell);
+                canvas.Children.Add(canvases[cell]);
             }
+            canvas.SizeChanged += (object sender, SizeChangedEventArgs eventArgs) =>
+            {
+                foreach (var cell in _cellGrid)
+                {
+                    TransformCell(canvases[cell], cell, (float)eventArgs.NewSize.Width, (float)eventArgs.NewSize.Height);
+                }
+            };
+            return canvas;
         }
 
-        public Canvas DrawCell(Cell cell, float baseX, float baseY)
+        public Canvas DrawCell(Cell cell)
         {
             var cellCanvas = new Canvas();
             cellCanvas.Width = Constants.CellSizeHost;
             cellCanvas.Height = Constants.CellSizeHost;
-            Canvas.SetLeft(cellCanvas, baseX + (cell.I * Constants.CellSizeHost));
-            Canvas.SetTop(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
+            TransformCell(cellCanvas, cell, 800, 600);
             cellCanvas.Background = new SolidColorBrush(Colors.Gray);
             cellCanvas.Children.Add(DrawTextBox(cell, Constants.CellSizeHost));
             return cellCanvas;
+        }
+
+        public void TransformCell(Canvas cellCanvas, Cell cell, float newX, float newY)
+        {
+            var baseX = (newX - (3 * Constants.CellSizeHost)) / 2;
+            var baseY = (newY - (3 * Constants.CellSizeHost)) / 2;
+            Canvas.SetLeft(cellCanvas, baseX + (cell.I * Constants.CellSizeHost));
+            Canvas.SetTop(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
         }
 
         public Label DrawTextBox(Cell cell, int size)

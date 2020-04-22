@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TTT.Core;
 
 namespace TTT.Host
 {
@@ -21,19 +20,13 @@ namespace TTT.Host
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow(Game game)
+        public MainWindow()
         {
             InitializeComponent();
-
-
-            game.DrawCells((float)Width, (float)Height);
-            Content = game.Canvas;
-            AddConnectButton(game.Canvas);
-            AddStartButton(game.Canvas);
-            AddTestButton(game.Canvas);
         }
 
-        private void AddConnectButton(Canvas canvas)
+
+        public void AddConnectButton(Panel canvas)
         {
             var button = new Button();
             button.Content = "Connect";
@@ -43,7 +36,7 @@ namespace TTT.Host
             canvas.Children.Add(button);
         }
 
-        private void AddStartButton(Canvas canvas)
+        public void AddStartButton(Panel canvas)
         {
             var button = new Button();
             button.Content = "Start";
@@ -53,7 +46,7 @@ namespace TTT.Host
             canvas.Children.Add(button);
         }
 
-        private void AddTestButton(Canvas canvas)
+        public void AddTestButton(Panel canvas)
         {
             var button = new Button();
             button.Content = "Test";
