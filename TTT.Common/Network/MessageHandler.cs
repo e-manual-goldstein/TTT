@@ -25,7 +25,7 @@ namespace TTT.Common
         private void ErrorHandler(object sender, ErrorEventArgs eventArgs)
         {
             eventArgs.ErrorContext.Handled = true;
-            _logger.Warning($"{sender}");
+            _logger.Warning($"{eventArgs.ErrorContext.Error.Message}");
         }
 
     }
