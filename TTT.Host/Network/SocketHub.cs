@@ -13,7 +13,7 @@ using TTT.Common;
 using TTT.Host.Control;
 using System.Threading;
 
-namespace TTT.Core
+namespace TTT.Host
 {
     public class SocketHub
     {

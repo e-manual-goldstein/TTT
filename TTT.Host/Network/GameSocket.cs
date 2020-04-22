@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TTT.Common;
 using TTT.Host.Control;
 
-namespace TTT.Core
+namespace TTT.Host
 {
     public class GameSocket
     {
@@ -112,17 +112,12 @@ namespace TTT.Core
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
-                if (DateTime.TryParse(messageReceived, out DateTime pingResult))
-                {
-                    _logger.Warning($"Pinged: {pingResult}");
-                    return;
-                }
-                _logger.Log($"Received message: {messageReceived}");
                 if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
                 {
                     _controllerManager.ExecuteCommand(gameCommand);
                 }
-                //Broadcast(messageReceived);
+                else
+                    _logger.Log($"Received message: {messageReceived}");
             }
             else
                 _logger.Warning("mask bit not set");
