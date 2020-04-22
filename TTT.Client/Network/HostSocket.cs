@@ -14,6 +14,7 @@ namespace TTT.Client
         IPAddress _serverAddress;
         Guid _clientId;
         EventHandler<MessageReceivedEventArgs> _messageHandler;
+        WebSocket _webSocket;
         bool _isOpen;
 
         public HostSocket(IPAddress serverAddress, Guid clientId, EventHandler<MessageReceivedEventArgs> messageHandler, bool openSocket = false)
@@ -34,21 +35,7 @@ namespace TTT.Client
 
         public void Send(string message)
         {
-            WebSocket.Send(message);
-        }
-
-        public void OpenSocket()
-        {
-            openWebSocket(_messageHandler);
-        }
-
-        WebSocket _webSocket;
-        WebSocket WebSocket
-        {
-            get
-            {
-                return _webSocket ?? (_webSocket = openWebSocket(_messageHandler));
-            }
+            _webSocket.Send(message);
         }
 
         private WebSocket openWebSocket(EventHandler<MessageReceivedEventArgs> eventHandler)

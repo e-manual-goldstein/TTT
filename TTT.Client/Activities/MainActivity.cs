@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -25,7 +26,7 @@ namespace TTT.Client
     {
         public int _width;
         public int _height;
-
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
             var metrics = Resources.DisplayMetrics;
@@ -38,8 +39,10 @@ namespace TTT.Client
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
             var gameManager = app.ServiceProvider.GetService<GameManager>();
+            var dict = createActionDictionary();
             if (!gameManager.GameIsInProgress())
-                AddListenButton();
+                //AddListenButton();
+                AddButtons(dict);
             else
                 //replace with Reconnect + GetGameState
                 AddGameGrid(new GameState(Guid.NewGuid(), null));
@@ -47,8 +50,41 @@ namespace TTT.Client
             SetSupportActionBar(toolbar);
         }
 
+        private Dictionary<string, EventHandler> createActionDictionary()
+        {
+            return new Dictionary<string, EventHandler>() 
+            { 
+                { "LISTEN", new EventHandler(EventListener) },
+                { "TEST", new EventHandler(Test) }
+            };
+        }
+
         public void ReloadView(FrameLayout frameLayout)
         {
+            SetContentView(frameLayout);
+        }
+
+        public void AddButtons(IDictionary<string, EventHandler> callbackDictionary)
+        {
+            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
+            var baseX = (_width - Constants.CellSizeClient) / 2;
+                var frameLayout = new FrameLayout(this);
+            int n = 1;
+            foreach (var item in callbackDictionary)
+            {   
+                var baseY = (n * (_height - Constants.CellSizeClient)) / (callbackDictionary.Count + 1);
+                var button = new Button(this);
+                button.LayoutParameters = baseLayout;
+                button.SetX(baseX);
+                button.SetY(baseY);
+                button.SetBackgroundColor(Color.Gray);
+                button.SetTextColor(Color.White);
+                button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
+                button.Text = item.Key;
+                button.Click += item.Value;
+                frameLayout.AddView(button);
+                n++;
+            }
             SetContentView(frameLayout);
         }
 
@@ -78,7 +114,20 @@ namespace TTT.Client
             if (socketManager.HostSocket ==  null || !socketManager.HostSocket.IsOpen)
             {
                 RunOnUiThread(async () => {
-                    var playerId = await socketManager.Listen(this);
+                    var playerId = await socketManager.Listen();
+                    playerManager.SetPlayerId(playerId);
+                });
+            }
+        }
+
+        private void Test(object sender, EventArgs e)
+        {
+            var socketManager = App.Current.ServiceProvider.GetService<SocketManager>();
+            var playerManager = App.Current.ServiceProvider.GetService<PlayerManager>();
+            if (socketManager.HostSocket == null || !socketManager.HostSocket.IsOpen)
+            {
+                Task.Run(async () => {
+                    var playerId = await socketManager.Listen();
                     playerManager.SetPlayerId(playerId);
                 });
             }

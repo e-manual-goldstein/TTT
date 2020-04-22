@@ -20,7 +20,7 @@ namespace TTT.Client
             _controllerManager = controllerManager;
         }
 
-        public async Task<Guid> Listen(MainActivity mainActivity)
+        public async Task<Guid> Listen()
         {
             _listening = true;
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
@@ -35,7 +35,6 @@ namespace TTT.Client
                         {
                             _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage), true);
                             _listening = false;
-                            //mainActivity.AsyncAddGameGrid();
                         }
                     });
                 //_hostSocket.Send($"{clientId}");
