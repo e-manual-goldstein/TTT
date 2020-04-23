@@ -3,27 +3,35 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using TTT.Common;
 
 namespace TTT.Host
 {
     public class ViewManager
     {
         MainWindow _mainWindow;
-        Dictionary<object, FrameworkElement> _uiElements = new Dictionary<object, FrameworkElement>();
+        Dictionary<IUpdatingElement, FrameworkElement> _uiElements = new Dictionary<IUpdatingElement, FrameworkElement>();
+        View _currentView;
 
         public ViewManager(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
         }
 
-        public void SetContent(FrameworkElement content)
+        public void SetContent(View view)
         {
-            _mainWindow.Content = content;
+            _currentView = view;
+            _mainWindow.Content = view.Content;
             _mainWindow.SizeChanged += (object sender, SizeChangedEventArgs eventArgs) =>
             {
-                content.Height = eventArgs.NewSize.Height;
-                content.Width = eventArgs.NewSize.Width;
+                view.SizeChanged(eventArgs.NewSize);
             };
+        }
+
+        public void AddBoundElement(IUpdatingElement updatingElement, FrameworkElement viewObject)
+        {
+            //_content.Children.Add(viewObject);
+            _uiElements[updatingElement] = viewObject;
         }
 
         public void AddButtons(Panel content)
@@ -35,7 +43,7 @@ namespace TTT.Host
 
         public void RefreshView()
         {
-
+            _currentView.Refresh();
         }
     }
 }

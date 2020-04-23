@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
 using TTT.Common;
+using TTT.Host.Api;
 using TTT.Host.Control;
 using TTT.Host.Events;
 
@@ -27,7 +28,7 @@ namespace TTT.Host
             services.AddSingleton<ViewManager>();
             services.AddSingleton<GameManager>();
             services.AddSingleton<MainWindow>();
-            services.AddSingleton<SocketHub>();
+            services.AddSingleton<ISocketHub, SocketHub>();
             services.AddSingleton<MessageHandler>();
             services.AddSingleton<Logger>();
             services.AddSingleton<ControllerManager>(provider =>
@@ -42,7 +43,7 @@ namespace TTT.Host
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var socketHub = _serviceProvider.GetService<SocketHub>();
+            var socketHub = _serviceProvider.GetService<ISocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
             var gameManager = _serviceProvider.GetService<GameManager>();
             var game = gameManager.StartNewGame();

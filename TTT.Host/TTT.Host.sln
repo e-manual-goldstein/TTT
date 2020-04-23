@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TTT.Host", "TTT.Host.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TTT.Common", "..\TTT.Common\TTT.Common.csproj", "{9AB1D11A-98B2-4124-AC04-1E741B14CB1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TTT.Host.Api", "..\TTT.Host.Api\TTT.Host.Api.csproj", "{933AF321-C155-4FA5-A194-BF788DF391EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9AB1D11A-98B2-4124-AC04-1E741B14CB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AB1D11A-98B2-4124-AC04-1E741B14CB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AB1D11A-98B2-4124-AC04-1E741B14CB1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{933AF321-C155-4FA5-A194-BF788DF391EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{933AF321-C155-4FA5-A194-BF788DF391EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{933AF321-C155-4FA5-A194-BF788DF391EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{933AF321-C155-4FA5-A194-BF788DF391EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

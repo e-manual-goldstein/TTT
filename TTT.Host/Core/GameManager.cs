@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 using TTT.Common;
+using TTT.Host.Api;
 using TTT.Host.Events;
 
 namespace TTT.Host
 {
     public class GameManager
     {
-        SocketHub _socketHub;
+        ISocketHub _socketHub;
         Game _currentGame;
         ViewManager _viewManager;
 
-        public GameManager(ViewManager viewManager, SocketHub socketHub)
+        public GameManager(ViewManager viewManager, ISocketHub socketHub)
         {
             _socketHub = socketHub;
             _viewManager = viewManager;
@@ -23,7 +24,7 @@ namespace TTT.Host
             var gameId = Guid.NewGuid();
             _currentGame = new Game(gameId, TurnTaken, EndGame);
             var canvas = _currentGame.DrawCells();
-            _viewManager.SetContent(canvas);
+            _viewManager.SetContent(new GameView() { Content = canvas });
             _viewManager.AddButtons(canvas);
 
             return _currentGame;

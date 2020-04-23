@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TTT.Common\TTT.Common.csproj" />
+    <ProjectReference Include="..\TTT.Host.Api\TTT.Host.Api.csproj" />
   </ItemGroup>
 </Project>
