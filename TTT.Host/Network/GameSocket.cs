@@ -13,14 +13,14 @@ namespace TTT.Host
     public class GameSocket
     {
         Logger _logger;
-        MessageHandler _messageHandler;
-        ControllerManager _controllerManager;
 
-        public GameSocket(Logger logger, MessageHandler messageHandler, ControllerManager controllerManager)
+        public delegate void CommandReceivedEventHandler(object sender, CommandReceivedEventArgs gameCommand);
+
+        event CommandReceivedEventHandler _receiveCommandEvent;
+
+        public GameSocket(Logger logger)
         {
             _logger = logger;
-            _messageHandler = messageHandler;
-            _controllerManager = controllerManager;
             KeepAlive = true;
         }
 
@@ -29,6 +29,12 @@ namespace TTT.Host
         public NetworkStream ActiveStream { get; set; }
 
         public TcpClient Client { get; set; }
+
+        public event CommandReceivedEventHandler CommandReceived 
+        { 
+            add { _receiveCommandEvent += value; } 
+            remove { _receiveCommandEvent -= value; }
+        }
 
         public void Kill()
         {
@@ -64,7 +70,6 @@ namespace TTT.Host
                 }
                 catch
                 {
-                    //Output.Debug("Lost Connection. Terminating Socket");
                     Kill();
                 }
             }
@@ -112,9 +117,9 @@ namespace TTT.Host
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
-                if (_messageHandler.TryParse(messageReceived, out GameCommand gameCommand))
+                if (GameCommand.TryParse(messageReceived, out GameCommand gameCommand))
                 {
-                    _controllerManager.ExecuteCommand(gameCommand);
+                    _receiveCommandEvent.Invoke(this, new CommandReceivedEventArgs(gameCommand));
                 }
                 else
                     _logger.Log($"Received message: {messageReceived}");

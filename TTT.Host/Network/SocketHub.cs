@@ -12,24 +12,23 @@ using TTT.Host;
 using TTT.Common;
 using TTT.Host.Control;
 using System.Threading;
+using TTT.Host.Api;
 
 namespace TTT.Host
 {
-    public class SocketHub
+    public class SocketHub : ISocketHub
     {
         const string stdResponseGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         const int PORT_NO = 69;
         Logger _logger;
-        MessageHandler _messageHandler;
         ControllerManager _controllerManager;
         IPAddress tcpListenerAddresss;
         TcpListener _server;
         IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
-        public SocketHub(Logger logger, MessageHandler messageHandler, ControllerManager controllerManager)
+        public SocketHub(Logger logger, ControllerManager controllerManager)
         {
             _logger = logger;
-            _messageHandler = messageHandler;
             _controllerManager = controllerManager;
             StartServer();
         }
@@ -78,14 +77,26 @@ namespace TTT.Host
             await _server.AcceptTcpClientAsync().ContinueWith(async task => 
             {
                 _logger.Log($"Connecting Socket");
-                _activeSockets[socketId] = new GameSocket(_logger, _messageHandler, _controllerManager);
-                _activeSockets[socketId].Client = task.Result;
+                _activeSockets[socketId] = CreateSocket(task.Result);
                 _logger.Log("Cancelling Token");
                 source.Cancel();
                 await OpenConnectionAsync(socketId);
                 return;
             });
             return socketId;
+        }
+
+        private GameSocket CreateSocket(TcpClient client)
+        {
+            var socket = new GameSocket(_logger);
+            socket.Client = client;
+            socket.CommandReceived += HandleSocketCommand;
+            return socket;
+        }
+
+        private void HandleSocketCommand(object sender, CommandReceivedEventArgs e)
+        {
+            _controllerManager.ExecuteCommand(e.Command);
         }
 
         private void BroadcastInvitationOnThread(Guid socketId, CancellationToken cancellationToken)
@@ -139,23 +150,23 @@ namespace TTT.Host
 
         #endregion
 
-        public Guid RequestSocketConnection(Guid id)
-        {
-            _logger.Log($"Requesting socket connection");
-            var server = _server;
-            _logger.Log($"Starting Server: {server.LocalEndpoint}");
-            server.Start();
-            if (_activeSockets.ContainsKey(id))
-            {
-                _logger.Warning("Found connection for same Id, disposing old connection");
-                _activeSockets[id].Kill();
-            }
-            _activeSockets[id] = new GameSocket(_logger, _messageHandler, _controllerManager);
-            _logger.Log($"Opening Socket for {id}");
-            _activeSockets[id].Client = server.AcceptTcpClient();
-            _logger.Log($"Socket Connected");
-            return id;
-        }
+        //public Guid RequestSocketConnection(Guid id)
+        //{
+        //    _logger.Log($"Requesting socket connection");
+        //    var server = _server;
+        //    _logger.Log($"Starting Server: {server.LocalEndpoint}");
+        //    server.Start();
+        //    if (_activeSockets.ContainsKey(id))
+        //    {
+        //        _logger.Warning("Found connection for same Id, disposing old connection");
+        //        _activeSockets[id].Kill();
+        //    }
+        //    _activeSockets[id] = new GameSocket(_logger, _messageHandler, _controllerManager);
+        //    _logger.Log($"Opening Socket for {id}");
+        //    _activeSockets[id].Client = server.AcceptTcpClient();
+        //    _logger.Log($"Socket Connected");
+        //    return id;
+        //}
 
         public async Task OpenConnectionAsync(Guid userId)
         {
