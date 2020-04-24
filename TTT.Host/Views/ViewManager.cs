@@ -41,7 +41,12 @@ namespace TTT.Host
             _mainWindow.AddTestButton(content);
         }
 
-        public void RefreshView()
+        public void Show()
+        {
+            _currentView.Show();
+        }
+
+        public void Update()
         {
             _currentView.Refresh();
         }

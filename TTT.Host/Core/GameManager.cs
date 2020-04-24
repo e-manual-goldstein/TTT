@@ -23,10 +23,10 @@ namespace TTT.Host
         {
             var gameId = Guid.NewGuid();
             _currentGame = new Game(gameId, TurnTaken, EndGame);
-            var canvas = _currentGame.DrawCells();
-            _viewManager.SetContent(new GameView() { Content = canvas });
-            _viewManager.AddButtons(canvas);
-
+            var gameView = new GameView(_currentGame);
+            _viewManager.SetContent(gameView);
+            _viewManager.AddButtons(gameView.Content);
+            _viewManager.Show();
             return _currentGame;
         }
 
@@ -41,6 +41,7 @@ namespace TTT.Host
             var gameState = game.GetCurrentState();
             var subCommand = new UpdateStateCommand(gameState, false);
             _socketHub.BroadcastCommand(new GameCommand(subCommand));
+            _viewManager.Update();
         }
 
         private void EndGame(object sender, EndGameEventArgs eventArgs)

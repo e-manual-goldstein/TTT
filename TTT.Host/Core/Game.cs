@@ -12,38 +12,18 @@ using TTT.Host.Events;
 
 namespace TTT.Host
 {
-    public class Game
+    public class Game //: IUpdatingElement
     {
         Guid _gameId;
         Cell[,] _cellGrid;
         List<Cell> _allCells = new List<Cell>();
         Cell[][] _sets;
-        float _screenWidth;
-        float _screenHeight;
-        Func<float> _widthFunc;
-        Func<float> _heightFunc;
+       
         Dictionary<Guid, Marker> _players = new Dictionary<Guid, Marker>();
         Guid _currentPlayerId;
 
         EventHandler _turnTaken;
         EventHandler<EndGameEventArgs> _endGame;
-
-        //public Game(float screenWidth, float screenHeight) : this()
-        //{
-
-        //    _screenWidth = screenWidth;
-        //    _screenHeight = screenHeight;
-        //    Canvas = new Canvas();
-        //    Canvas.Width = screenWidth;
-        //    Canvas.Height = screenHeight;
-
-        //}
-
-        //public Game(Func<float> widthFunc, Func<float> heightFunc) : this(widthFunc(), heightFunc())
-        //{
-        //    _widthFunc = widthFunc;
-        //    _heightFunc = heightFunc;
-        //}
 
         public Game(Guid gameId, EventHandler turnTakenEventHandler, EventHandler<EndGameEventArgs> endGameEventHandler)
         {
@@ -65,8 +45,6 @@ namespace TTT.Host
             return cells;
         }
 
-        //public Canvas Canvas { get; set; }
-
         public Cell[,] GameCells 
         {
             get
@@ -74,7 +52,6 @@ namespace TTT.Host
                 return _cellGrid;
             }
         }
-
 
         public void TakePlayerTurn(Guid playerId, Cell cell)
         {
@@ -128,70 +105,6 @@ namespace TTT.Host
                 }
             }
             return cellArray;
-        }
-
-        public Canvas DrawCells()
-        {
-            var canvas = new Canvas();
-            var canvases = new Dictionary<Cell, Canvas>();
-
-            foreach (var cell in _cellGrid)
-            {
-                canvases[cell] = DrawCell(cell);
-                canvas.Children.Add(canvases[cell]);
-            }
-            canvas.SizeChanged += (object sender, SizeChangedEventArgs eventArgs) =>
-            {
-                foreach (var cell in _cellGrid)
-                {
-                    TransformCell(canvases[cell], cell, (float)eventArgs.NewSize.Width, (float)eventArgs.NewSize.Height);
-                }
-            };
-            return canvas;
-        }
-
-        public Canvas DrawCell(Cell cell)
-        {
-            var cellCanvas = new Canvas();
-            cellCanvas.Width = Constants.CellSizeHost;
-            cellCanvas.Height = Constants.CellSizeHost;
-            TransformCell(cellCanvas, cell, 800, 600);
-            cellCanvas.Background = new SolidColorBrush(Colors.Gray);
-            cellCanvas.Children.Add(DrawTextBox(cell, Constants.CellSizeHost));
-            return cellCanvas;
-        }
-
-        public void TransformCell(Canvas cellCanvas, Cell cell, float newX, float newY)
-        {
-            var baseX = (newX - (3 * Constants.CellSizeHost)) / 2;
-            var baseY = (newY - (3 * Constants.CellSizeHost)) / 2;
-            Canvas.SetLeft(cellCanvas, baseX + (cell.I * Constants.CellSizeHost));
-            Canvas.SetTop(cellCanvas, baseY + (cell.J * Constants.CellSizeHost));
-        }
-
-        public Label DrawTextBox(Cell cell, int size)
-        {
-            var label = new Label();
-            label.Height = size - 2;
-            label.Width = size - 2;
-            label.Background = new SolidColorBrush(Colors.White);
-            label.FontSize = 40;
-            label.HorizontalContentAlignment = HorizontalAlignment.Center;
-            label.VerticalContentAlignment = VerticalAlignment.Center;
-            Canvas.SetBottom(label, 1);
-            Canvas.SetLeft(label, 1);
-            cell.SetUpdateValueAction((newValue) => UpdateCellValue(label, newValue, () => cell.Active));
-            return label;
-        }
-
-        public void UpdateCellValue(Label label, Marker newValue, Func<bool> active)
-        {
-            App.Current.Dispatcher.Invoke(() => 
-            {
-                label.Content = newValue.ToString();
-                if (active())
-                    label.Background = new SolidColorBrush(Colors.Tomato);
-            });
         }
 
         public GameState GetCurrentState()

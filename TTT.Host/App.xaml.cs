@@ -25,12 +25,11 @@ namespace TTT.Host
 
         private void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<Logger>();
+            services.AddSingleton<MainWindow>();
             services.AddSingleton<ViewManager>();
             services.AddSingleton<GameManager>();
-            services.AddSingleton<MainWindow>();
-            services.AddSingleton<ISocketHub, SocketHub>();
-            services.AddSingleton<MessageHandler>();
-            services.AddSingleton<Logger>();
+
             services.AddSingleton<ControllerManager>(provider =>
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
@@ -38,6 +37,8 @@ namespace TTT.Host
                     typeof(GameController)
                 });
             });
+            services.AddSingleton<ISocketHub, SocketHub>();
+
             services.AddScoped<GameController>();
         }
 

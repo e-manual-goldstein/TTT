@@ -6,9 +6,11 @@ using System.Windows.Controls;
 
 namespace TTT.Host
 {
-    public abstract class View//<T> where T : IUpdatingElement
+    public abstract class View//<TModel> where TModel : IUpdatingElement
     {
         public Canvas Content { get; internal set; }
+
+        //public TModel Model { get; set; }
 
         internal void Refresh()
         {
@@ -19,5 +21,6 @@ namespace TTT.Host
 
         //TODO: Is this needed?
         public abstract void SizeChanged(Size newSize);
+        public abstract void Show();
     }
 }
