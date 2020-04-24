@@ -1,0 +1,41 @@
+[Client] Store host address in Activity.OnSaveInstanceState
+	[Host] <SocketHub> Add receiver configured to accept reconnection attempts
+		[Client] If game is in progress and no connection available, attempt to reconnect
+
+[Client] Create new Activity for playing an active game
+	[Client] MainActivity should be used for main menu
+
+[Client] Primary lifecycle of application should be based on "Scenes" (Activities)
+[Host] Create <MainMenu> + <MenuView>
+[Host] Game should auto-start when two clients connected
+[Client] Add some form of "Connected" message when websocket successfully connects
+
+--------------------NOT MVP--------------------------------------------------------
+[Host] <SocketHub> OpenConnection could/should use ReadAsync instead
+-----------------------------------------------------------------------------------
+
+
+COMPLETE
+[Host] Get TcpListener address from introspecting UDP broadcast
+[Host] SocketHub --> Convert to use just one TcpListener
+[Host] Test Button --> Broadcasts connection instructions to awaiting clients
+[Client] Connect Button --> "Listen" button --> On message received: Show gameboard
+[Host] <SocketHub> BroadcastInvitation should continue pinging until response received or cancellation through token
+[Host] Create Continuous Broadcaster
+[Host] Create Cancellation Token
+[Client] Gameboard --> Sends commands through ClientSockets
+[BOTH] Implement IoC of some kind - [Host] = .NET Core? [Client] ?
+[Client] Needs a Controller for receiving commands/updates from host
+[Common] new object <GameState> sent to Clients upon connection
+[Host] use <GameState> to dictate Marker/Side (X/O) for connecting clients
+[Host] Must notify client that turn is taken
+[Host] Controller(s) should be disposable, stateless and managed by a ControllerService --> Sockets should only know about the ControllerService
+[Client] Must disable all input when not "My" turn
+[Client] Listen button should only make one request
+[Client] Cell values should be individually updateable;
+[Host] <GameGrid> --> <Game>
+[Host] Create <GameManager>
+[Host] Create a more fluid/robust system for handling UI updates
+[Host] <ViewManager> is passed a <GameView> from <GameManager> which is created from a <Game>
+[Host] <GameManager> should manage incoming commands, update the relevant <Game>, and send updated state to [Client]s AND <MainWindow>
+[Host] <Game> separate UI logic from game logic
