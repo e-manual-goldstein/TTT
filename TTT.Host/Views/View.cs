@@ -6,21 +6,30 @@ using System.Windows.Controls;
 
 namespace TTT.Host
 {
-    public abstract class View//<TModel> where TModel : IUpdatingElement
+    public abstract class View//<T> where T : class
     {
+        readonly IDictionary<object, Action<object>> _updatingObjects = new Dictionary<object, Action<object>>();
+        
         public Canvas Content { get; internal set; }
 
         //public TModel Model { get; set; }
 
-        internal void Refresh()
+        public void Refresh()
         {
-           // Get List of elements that need to be updated
-           // Update elements with new values
-           // Clear List of updated elements 
+            foreach (var key in _updatingObjects.Keys)
+            {
+                App.Current.Dispatcher.Invoke(() => _updatingObjects[key](key));
+            }
+            // Clear List of updated elements 
         }
 
         //TODO: Is this needed?
         public abstract void SizeChanged(Size newSize);
         public abstract void Show();
+
+        protected void RegisterUpdatingAction(object obj, Action<object> action)
+        {
+            _updatingObjects[obj] = action;
+        }
     }
 }

@@ -37,16 +37,16 @@ namespace TTT.Common
         }
 
 
-        Action<Marker> _updateValueAction;
-        public void SetUpdateValueAction(Action<Marker> action)
-        {
-            _updateValueAction = action;
-        }
+        //Action<Marker> _updateValueAction;
+        //public void SetUpdateValueAction(Action<Marker> action)
+        //{
+        //    _updateValueAction = action;
+        //}
 
         public void UpdateValue(Marker marker)
         {
             Marker = marker;
-            _updateValueAction(marker);
+            //_updateValueAction(marker);
         }
 
         Action<Cell> _takeTurnAction;

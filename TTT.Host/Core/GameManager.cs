@@ -18,8 +18,7 @@ namespace TTT.Host
             _socketHub = socketHub;
             _viewManager = viewManager;
         }
-
-        public Game StartNewGame()
+        public Game CreateNewGame()
         {
             var gameId = Guid.NewGuid();
             _currentGame = new Game(gameId, TurnTaken, EndGame);
@@ -27,6 +26,12 @@ namespace TTT.Host
             _viewManager.SetContent(gameView);
             _viewManager.AddButtons(gameView.Content);
             _viewManager.Show();
+            return _currentGame;
+        }
+
+        public Game StartGame()
+        {
+            _viewManager.Update();
             return _currentGame;
         }
 

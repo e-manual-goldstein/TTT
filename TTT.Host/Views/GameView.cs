@@ -29,8 +29,7 @@ namespace TTT.Host
         }
 
         private Canvas DrawCells(Cell[,] cellGrid)
-        {
-            
+        {            
             var canvases = new Dictionary<Cell, Canvas>();
 
             foreach (var cell in cellGrid)
@@ -78,18 +77,24 @@ namespace TTT.Host
             label.VerticalContentAlignment = VerticalAlignment.Center;
             Canvas.SetBottom(label, 1);
             Canvas.SetLeft(label, 1);
-            cell.SetUpdateValueAction((newValue) => UpdateCellValue(label, newValue, () => cell.Active));
+            RegisterUpdatingAction(cell, (c) =>
+            {
+                label.Content = ((Cell)c).Marker;
+                if (((Cell)c).Active)
+                    label.Background = new SolidColorBrush(Colors.Tomato);
+            });
+            //cell.SetUpdateValueAction((newValue) => UpdateCellValue(label, newValue, () => cell.Active));
             return label;
         }
 
-        public void UpdateCellValue(Label label, Marker newValue, Func<bool> active)
-        {
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                label.Content = newValue.ToString();
-                if (active())
-                    label.Background = new SolidColorBrush(Colors.Tomato);
-            });
-        }
+        //private void UpdateCellValue(Label label, Marker newValue, Func<bool> active)
+        //{
+        //    App.Current.Dispatcher.Invoke(() =>
+        //    {
+        //        label.Content = newValue.ToString();
+        //        if (active())
+        //            label.Background = new SolidColorBrush(Colors.Tomato);
+        //    });
+        //}
     }
 }

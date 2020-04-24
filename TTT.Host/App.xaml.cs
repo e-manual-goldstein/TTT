@@ -47,7 +47,7 @@ namespace TTT.Host
             var socketHub = _serviceProvider.GetService<ISocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
             var gameManager = _serviceProvider.GetService<GameManager>();
-            var game = gameManager.StartNewGame();
+            var game = gameManager.CreateNewGame();
 
             #region Menu 
 
@@ -61,10 +61,11 @@ namespace TTT.Host
             mainWindow.StartButtonAction = () =>
             {
                 game.StartRandomPlayer();
-                game.StartAtEndGame();
+                //game.StartAtEndGame();
                 var gameState = game.GetCurrentState();
                 var subCommand = new UpdateStateCommand(gameState, true);
                 socketHub.BroadcastCommand(new GameCommand(subCommand));
+                gameManager.StartGame();
             };
 
             mainWindow.TestButtonAction = async () =>
