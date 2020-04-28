@@ -9,72 +9,46 @@ namespace TTT.Host
     public class MainMenuView : View
     {
         MainMenu _model;
+        private List<Button> _buttons = new List<Button>();
 
         public MainMenuView(MainMenu mainMenu)
         {
             _model = mainMenu;
             Content = new Canvas();
-            AddConnectButton();
-            AddStartButton();
-            AddTestButton();
         }
 
         public override void Show()
         {
             //Add Action Buttons to Canvas
+            AddButtons();
+        }
 
+        private void AddButtons()
+        {
+            var actions = _model.MenuActions();
+            double baseY = (Content.Height - (actions.Count * 20)) / 2;
+            foreach (var kvp in _model.MenuActions())
+            {
+                var button = new Button();
+                button.Content = kvp.Key;
+                Canvas.SetTop(button, baseY);
+                Canvas.SetLeft(button, 20);
+                button.Click += (object sender, RoutedEventArgs eventArgs) => kvp.Value();
+                Content.Children.Add(button);
+                _buttons.Add(button);
+                baseY += 20;
+            }
         }
 
         public override void SizeChanged(Size newSize)
         {
-            // do nothing;
+            double baseY = (newSize.Height - (_buttons.Count * 20)) / 2;
+            foreach (var button in _buttons)
+            {
+                Canvas.SetTop(button, baseY);
+                baseY += 20;
+            }
         }
-
-        public void AddConnectButton()
-        {
-            var button = new Button();
-            button.Content = "Connect";
-            Canvas.SetTop(button, 20);
-            Canvas.SetLeft(button, 20);
-            button.Click += ConnectButton_Click;
-            Content.Children.Add(button);
-        }
-
-        public void AddStartButton()
-        {
-            var button = new Button();
-            button.Content = "Start";
-            Canvas.SetTop(button, 20);
-            Canvas.SetLeft(button, 100);
-            button.Click += StartButton_Click;
-            Content.Children.Add(button);
-        }
-
-        public void AddTestButton()
-        {
-            var button = new Button();
-            button.Content = "Test";
-            Canvas.SetTop(button, 20);
-            Canvas.SetLeft(button, 150);
-            button.Click += TestButton_Click;
-            Content.Children.Add(button);
-        }
-
-        private void ConnectButton_Click(object sender, RoutedEventArgs e)
-        {
-            _model.ConnectButtonAction();
-        }
-
-        private void StartButton_Click(object sender, RoutedEventArgs e)
-        {
-            _model.StartButtonAction();
-        }
-
-        private void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-            _model.TestButtonAction();
-        }
-
 
     }
 }

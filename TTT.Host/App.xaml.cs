@@ -46,9 +46,10 @@ namespace TTT.Host
         {
             var mainWindow = _serviceProvider.GetService<MainWindow>();
             var menu = _serviceProvider.GetService<MainMenu>();
+            menu.CreateActions();
             var menuView = new MainMenuView(menu);
             _serviceProvider.GetService<ViewManager>().SetContent(menuView);
-
+            menuView.Show();
             mainWindow.Show();
         }
 
