@@ -25,11 +25,16 @@ namespace TTT.Host
 
         private void ConfigureServices(IServiceCollection services)
         {
+            #region Base Services
             services.AddSingleton<Logger>();
             services.AddSingleton<MainWindow>();
+            services.AddTransient<PortManager>();
+            #endregion
+
             services.AddSingleton<ViewManager>();
             services.AddSingleton<GameManager>();
             services.AddSingleton<MainMenu>();
+            services.AddSingleton<ExternalConnectionManager>();
             services.AddSingleton<ControllerManager>(provider =>
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]

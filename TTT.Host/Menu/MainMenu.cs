@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Controls;
 using TTT.Common;
@@ -15,20 +16,24 @@ namespace TTT.Host
         GameManager _gameManager;
         ISocketHub _socketHub;
         ViewManager _viewManager;
+        ExternalConnectionManager _externalConnectionManager;
 
-        public MainMenu(GameManager gameManager, ISocketHub socketHub, ViewManager viewManager)
+        public MainMenu(GameManager gameManager, ISocketHub socketHub, ViewManager viewManager, ExternalConnectionManager externalConnectionManager)
         {
             _menuActions = new Dictionary<string, Action>();
             _gameManager = gameManager;
             _socketHub = socketHub;
             _viewManager = viewManager;
+            _externalConnectionManager = externalConnectionManager;
         }
 
         public void CreateActions()
         {
             _menuActions["Connect"] = async () => await Connect();
+            _menuActions["Connect Remote"] = async () => await ConnectRemote();
             _menuActions["Start"] = () => Start();
             _menuActions["Test"] = async () => await Test();
+            _menuActions["Terminate"] = async () => await _externalConnectionManager.TerminateAllActive();
         }
 
         public Dictionary<string, Action> MenuActions()
@@ -42,6 +47,18 @@ namespace TTT.Host
             var playerId = await _socketHub.ConnectAsync();
             game.AddPlayerToGame(playerId);
             //await socketHub.OpenConnectionAsync(playerId);
+        }
+
+        public async Task ConnectRemote()
+        {
+            await Task.Run(() =>
+            {
+                var game = _gameManager.CurrentGame();
+                Task.WaitAll(
+                    _externalConnectionManager.OpenExternalSocket(Guid.NewGuid()),
+                    _socketHub.BeginListening().ContinueWith(task => game.AddPlayerToGame(task.Result))
+                );
+            });
         }
 
         public void Start()

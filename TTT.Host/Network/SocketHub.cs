@@ -13,6 +13,7 @@ using TTT.Common;
 using TTT.Host.Control;
 using System.Threading;
 using TTT.Host.Api;
+using System.Net.Http;
 
 namespace TTT.Host
 {
@@ -22,7 +23,7 @@ namespace TTT.Host
         const int PORT_NO = 69;
         Logger _logger;
         ControllerManager _controllerManager;
-        IPAddress tcpListenerAddresss;
+        IPAddress _tcpListenerAddresss;
         TcpListener _server;
         IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
@@ -44,7 +45,7 @@ namespace TTT.Host
                 {
                     var message = UdpMessage.FromByteArray(listener.Receive(ref targetEndPoint));
                     _logger.Log(message.Payload + $"{targetEndPoint.Address}:{PORT_NO}");
-                    tcpListenerAddresss = targetEndPoint.Address;
+                    _tcpListenerAddresss = targetEndPoint.Address;
                     _server = new TcpListener(targetEndPoint.Address, PORT_NO);
                     _server.Start();
                 });
@@ -71,7 +72,6 @@ namespace TTT.Host
                 BroadcastInvitationAsTask(socketId, source.Token);
             return await clientId;
         }
-
         public async Task<Guid> BeginListening(Guid socketId, CancellationTokenSource source)
         {
             await _server.AcceptTcpClientAsync().ContinueWith(async task => 
@@ -85,6 +85,19 @@ namespace TTT.Host
             });
             return socketId;
         }
+        public async Task<Guid> BeginListening()
+        {
+            var socketId = Guid.NewGuid();
+            await _server.AcceptTcpClientAsync().ContinueWith(async task =>
+            {
+                _activeSockets[socketId] = CreateSocket(task.Result);
+                await OpenConnectionAsync(socketId);
+                return;
+            });
+            return socketId;
+        }
+
+       
 
         private GameSocket CreateSocket(TcpClient client)
         {
@@ -150,23 +163,11 @@ namespace TTT.Host
 
         #endregion
 
-        //public Guid RequestSocketConnection(Guid id)
-        //{
-        //    _logger.Log($"Requesting socket connection");
-        //    var server = _server;
-        //    _logger.Log($"Starting Server: {server.LocalEndpoint}");
-        //    server.Start();
-        //    if (_activeSockets.ContainsKey(id))
-        //    {
-        //        _logger.Warning("Found connection for same Id, disposing old connection");
-        //        _activeSockets[id].Kill();
-        //    }
-        //    _activeSockets[id] = new GameSocket(_logger, _messageHandler, _controllerManager);
-        //    _logger.Log($"Opening Socket for {id}");
-        //    _activeSockets[id].Client = server.AcceptTcpClient();
-        //    _logger.Log($"Socket Connected");
-        //    return id;
-        //}
+        #region Public properties
+
+        public IPAddress ServerAddress => _tcpListenerAddresss;
+        public int ServerPort => PORT_NO;
+        #endregion
 
         public async Task OpenConnectionAsync(Guid userId)
         {
