@@ -29,7 +29,7 @@ namespace TTT.Host
             services.AddSingleton<MainWindow>();
             services.AddSingleton<ViewManager>();
             services.AddSingleton<GameManager>();
-
+            services.AddSingleton<MainMenu>();
             services.AddSingleton<ControllerManager>(provider =>
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
@@ -44,37 +44,10 @@ namespace TTT.Host
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var socketHub = _serviceProvider.GetService<ISocketHub>();
             var mainWindow = _serviceProvider.GetService<MainWindow>();
-            var gameManager = _serviceProvider.GetService<GameManager>();
-            var game = gameManager.CreateNewGame();
-
-            #region Menu 
-
-            mainWindow.ConnectButtonAction = async () =>
-            {
-                var playerId = await socketHub.ConnectAsync();
-                game.AddPlayerToGame(playerId);
-                //await socketHub.OpenConnectionAsync(playerId);
-            };
-
-            mainWindow.StartButtonAction = () =>
-            {
-                game.StartRandomPlayer();
-                //game.StartAtEndGame();
-                var gameState = game.GetCurrentState();
-                var subCommand = new UpdateStateCommand(gameState, true);
-                socketHub.BroadcastCommand(new GameCommand(subCommand));
-                gameManager.StartGame();
-            };
-
-            mainWindow.TestButtonAction = async () =>
-            {
-                var playerId = await socketHub.ConnectAsync(true);
-                game.AddPlayerToGame(playerId);
-            };
-
-            #endregion
+            var menu = _serviceProvider.GetService<MainMenu>();
+            var menuView = new MainMenuView(menu);
+            _serviceProvider.GetService<ViewManager>().SetContent(menuView);
 
             mainWindow.Show();
         }

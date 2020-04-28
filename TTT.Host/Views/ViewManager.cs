@@ -34,12 +34,12 @@ namespace TTT.Host
             _uiElements[updatingElement] = viewObject;
         }
 
-        public void AddButtons(Panel content)
-        {
-            _mainWindow.AddConnectButton(content);
-            _mainWindow.AddStartButton(content);
-            _mainWindow.AddTestButton(content);
-        }
+        //public void AddButtons(Panel content)
+        //{
+        //    //_mainWindow.AddConnectButton(content);
+        //    //_mainWindow.AddStartButton(content);
+        //    //_mainWindow.AddTestButton(content);
+        //}
 
         public void Show()
         {

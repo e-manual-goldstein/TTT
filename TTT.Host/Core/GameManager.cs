@@ -24,7 +24,6 @@ namespace TTT.Host
             _currentGame = new Game(gameId, TurnTaken, EndGame);
             var gameView = new GameView(_currentGame);
             _viewManager.SetContent(gameView);
-            _viewManager.AddButtons(gameView.Content);
             _viewManager.Show();
             return _currentGame;
         }
