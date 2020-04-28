@@ -1,6 +1,4 @@
-[Host] Add "Register host with remote" function
-	[Host] Add "port forward" request
-	[Host] Add "cancel forwarded port" request
+
 [Client] Add "Look for games" function
 [Host] Add navigation buttons to <GameView>
 
@@ -56,3 +54,6 @@ COMPLETE
 [Relay] Add <ClientController>
 {Relay] Add <Host> 
 [Host] Create <MainMenu> + <MenuView>
+[Host] Add "Register host with remote" function
+[Host] Add "port forward" request
+[Host] Add "cancel forwarded port" request
