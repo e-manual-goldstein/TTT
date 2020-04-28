@@ -1,3 +1,16 @@
+[Host] Create <MainMenu> + <MenuView>
+[Host] Add "Register host with remote" function
+	[Host] Add "port forward" request
+	[Host] Add "cancel forwarded port" request
+[Client] Add "Look for games" function
+
+
+[Relay] <Client>	
+
+-------------------------PHASE 2---------------------------------------------------
+
+[Client] Add some form of message display facility. 
+	[Client] Add "Connected" message when websocket successfully connects
 [Client] Store host address in Activity.OnSaveInstanceState
 	[Host] <SocketHub> Add receiver configured to accept reconnection attempts
 		[Client] If game is in progress and no connection available, attempt to reconnect
@@ -6,9 +19,7 @@
 	[Client] MainActivity should be used for main menu
 
 [Client] Primary lifecycle of application should be based on "Scenes" (Activities)
-[Host] Create <MainMenu> + <MenuView>
 [Host] Game should auto-start when two clients connected
-[Client] Add some form of "Connected" message when websocket successfully connects
 
 --------------------NOT MVP--------------------------------------------------------
 [Host] <SocketHub> OpenConnection could/should use ReadAsync instead
@@ -39,3 +50,8 @@ COMPLETE
 [Host] <ViewManager> is passed a <GameView> from <GameManager> which is created from a <Game>
 [Host] <GameManager> should manage incoming commands, update the relevant <Game>, and send updated state to [Client]s AND <MainWindow>
 [Host] <Game> separate UI logic from game logic
+[Relay] Add EF implementation
+[Relay] Set up local DB + "somee" hosted DB
+[Relay] Add <HostController>
+[Relay] Add <ClientController>
+{Relay] Add <Host> 

@@ -20,7 +20,7 @@ namespace TTT.Tools
             _controllerManager = controllerManager;
         }
 
-        public async Task<Guid> Listen()
+        public async Task<Guid> ListenForHostInvitation()
         {
             _listening = true;
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
@@ -40,6 +40,19 @@ namespace TTT.Tools
                     });
                 //_hostSocket.Send($"{clientId}");
                 return clientId;
+            }
+        }
+
+
+        public async Task<UdpMessage> JustListen()
+        {
+            var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
+            using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
+            {
+                return await listener.ReceiveAsync().ContinueWith(task =>
+                {
+                    return UdpMessage.FromByteArray(task.Result.Buffer);
+                });
             }
         }
 

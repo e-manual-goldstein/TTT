@@ -15,10 +15,15 @@ namespace TTT.Tools
             ConfigureServices(serviceCollection);
             _serviceProvider = serviceCollection.BuildServiceProvider();
             Console.WriteLine("Hello World!");
+            var portManager = _serviceProvider.GetService<PortManager>();
+            portManager.AddPort();
             var socketManager = _serviceProvider.GetService<SocketManager>();
-            Task.Run(async () => 
-                await socketManager.Listen()
-                );
+            //var protocols = portManager.GetPorts();
+            //Task.Run(async () =>
+            //{
+            //    var message = await socketManager.JustListen();
+            //    Console.WriteLine(message.Payload);
+            //});
             Console.ReadLine();
         }
 
@@ -26,6 +31,7 @@ namespace TTT.Tools
         {
             services.AddSingleton<MessageHandler>();
             services.AddSingleton<SocketManager>();
+            services.AddSingleton<PortManager>();
             services.AddSingleton<Logger>();
             services.AddSingleton<ControllerManager>(provider =>
             {

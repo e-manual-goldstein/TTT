@@ -12,6 +12,7 @@ namespace TTT.Tools
     public class HostSocket
     {
         IPAddress _serverAddress;
+        int _port;
         Guid _clientId;
         EventHandler<MessageReceivedEventArgs> _messageHandler;
         bool _isOpen;
