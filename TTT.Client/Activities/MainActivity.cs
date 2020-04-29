@@ -41,12 +41,12 @@ namespace TTT.Client
             var gameManager = app.ServiceProvider.GetService<GameManager>();
             var dict = createActionDictionary();
             if (!gameManager.GameIsInProgress())
-                //AddListenButton();
                 AddButtons(dict);
             else
                 //replace with Reconnect + GetGameState
                 AddGameGrid(new GameState(Guid.NewGuid(), null));
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+            
             SetSupportActionBar(toolbar);
         }
 
@@ -55,7 +55,8 @@ namespace TTT.Client
             return new Dictionary<string, EventHandler>() 
             { 
                 { "LISTEN", new EventHandler(EventListener) },
-                { "TEST", new EventHandler(Test) }
+                { "TEST", new EventHandler(Test) },
+                { "CONNECT", new EventHandler(Connect) }
             };
         }
 
@@ -88,23 +89,14 @@ namespace TTT.Client
             SetContentView(frameLayout);
         }
 
-        public void AddListenButton()
+        private void Connect(object sender, EventArgs e)
         {
-            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-            var baseX = (_width - Constants.CellSizeClient) / 2;
-            var baseY = (_height - Constants.CellSizeClient) / 2;
-            var frameLayout = new FrameLayout(this);
-            var button = new Button(this);
-            button.LayoutParameters = baseLayout;
-            button.SetX(baseX);
-            button.SetY(baseY);
-            button.SetBackgroundColor(Color.Gray);
-            button.SetTextColor(Color.White);
-            button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-            button.Text = "LISTEN";
-            button.Click += EventListener;
-            frameLayout.AddView(button);
-            SetContentView(frameLayout);
+            var extConnector = App.Current.ServiceProvider.GetService<ExternalHostManager>();
+            var socketManager = App.Current.ServiceProvider.GetService<SocketManager>();
+            RunOnUiThread(async () => {
+                var ipEndpoint = await extConnector.FindOnlineGame();
+                socketManager.CreateSocket(ipEndpoint);
+            });
         }
 
         private void EventListener(object sender, EventArgs e)
@@ -132,11 +124,6 @@ namespace TTT.Client
                 });
             }
         }
-
-        //public void AsyncAddGameGrid()
-        //{
-        //    RunOnUiThread(() => AddGameGrid());
-        //}
 
         public void AddGameGrid(GameState gameState)
         {

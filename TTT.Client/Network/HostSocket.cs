@@ -40,7 +40,7 @@ namespace TTT.Client
 
         private WebSocket openWebSocket(EventHandler<MessageReceivedEventArgs> eventHandler)
         {
-            var webSocketClient = new WebSocket($"ws://{_serverAddress.ToString()}:69/");
+            var webSocketClient = new WebSocket($"ws://{_serverAddress}:58008/");
             webSocketClient.Opened += new EventHandler(webSocketClient_Opened);
             webSocketClient.Closed += new EventHandler(webSocketClient_Closed);
             webSocketClient.MessageReceived += eventHandler;

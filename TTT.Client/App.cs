@@ -47,6 +47,7 @@ namespace TTT.Client
             services.AddSingleton<SocketManager>();
             services.AddSingleton<GameManager>();
             services.AddSingleton<MessageHandler>();
+            services.AddSingleton<ExternalHostManager>();
             services.AddSingleton<ControllerManager>(provider =>
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]

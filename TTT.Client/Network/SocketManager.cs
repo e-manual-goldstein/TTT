@@ -51,5 +51,11 @@ namespace TTT.Client
         }
 
         public HostSocket HostSocket => _hostSocket;
+
+        internal void CreateSocket(IPEndPoint ipEndpoint)
+        {
+            _hostSocket = new HostSocket(ipEndpoint.Address, Guid.NewGuid(), new EventHandler<MessageReceivedEventArgs>(processMessage), true);
+
+        }
     }
 }

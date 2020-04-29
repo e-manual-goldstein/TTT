@@ -51,6 +51,7 @@ namespace TTT.Host
 
         public async Task ConnectRemote()
         {
+            _gameManager.CreateNewGame();
             await Task.Run(() =>
             {
                 var game = _gameManager.CurrentGame();
@@ -58,7 +59,9 @@ namespace TTT.Host
                     _externalConnectionManager.OpenExternalSocket(Guid.NewGuid()),
                     _socketHub.BeginListening().ContinueWith(task => game.AddPlayerToGame(task.Result))
                 );
+                _gameManager.StartGame();
             });
+            
         }
 
         public void Start()
