@@ -1,5 +1,6 @@
-[Client] Add some form of message display facility. 
-	[Client] Add "Connected" message when websocket successfully connects
+[Client] Separate UI from Game Logic
+	[Client] Add some form of message display facility. 
+		[Client] Add "Connected" message when websocket successfully connects
 [Relay] Encrypt IP Addresses
 [Client] Add "Look for games" function
 [Host] Add navigation buttons to <GameView>
