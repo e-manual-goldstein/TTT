@@ -27,17 +27,29 @@ namespace TTT.Client
         public int _width;
         public int _height;
         
+        public MainActivity()
+        {
+            
+        }
+
+        public MainActivity(IntPtr intPtr, JniHandleOwnership javaShit) : base(intPtr, javaShit)
+        {
+           //Perhaps not needed unless Main Activity is Main Entry point
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            var metrics = Resources.DisplayMetrics;
-            _width = metrics.WidthPixels;
-            _height = metrics.HeightPixels;
 
-            var app = App.Current;
-            app.RegisterMainActivity(this);
             //OnSaveInstanceState(null);
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
+            
+            #region Move App logic to App
+            var metrics = Resources.DisplayMetrics;
+            _width = metrics.WidthPixels;
+            _height = metrics.HeightPixels;
+            var app = App.Current;
+            app.RegisterMainActivity(this);
             var gameManager = app.ServiceProvider.GetService<GameManager>();
             var dict = createActionDictionary();
             if (!gameManager.GameIsInProgress())
@@ -45,6 +57,8 @@ namespace TTT.Client
             else
                 //replace with Reconnect + GetGameState
                 AddGameGrid(new GameState(Guid.NewGuid(), null));
+            #endregion
+
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             
             SetSupportActionBar(toolbar);

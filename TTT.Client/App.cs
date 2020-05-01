@@ -17,10 +17,14 @@ using TTT.Common;
 
 namespace TTT.Client
 {
+    [Application(Name = "com.companyname.ttt.client.App", Theme = "@style/AppTheme.NoActionBar")]
     public class App : Application
     {
         #region App Instance
+
+        //TODO: To be removed
         static Lazy<App> _app = new Lazy<App>();
+        //TODO: To be removed
         public static App Current { get => _app.Value; }
 
         #endregion
@@ -32,11 +36,24 @@ namespace TTT.Client
 
         #endregion
 
+        //TODO: To be removed
         public App()
         {
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             _serviceProvider = serviceCollection.BuildServiceProvider();
+        }
+
+        public App(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+        {
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+        }
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
         }
 
         private void ConfigureServices(IServiceCollection services)
@@ -59,7 +76,8 @@ namespace TTT.Client
             services.AddScoped<StateController>();
             services.AddScoped<GameGrid>();
         }
-
+        
+        //TODO: Is this supposed to be here?
         internal void RegisterMainActivity(MainActivity mainActivity)
         {
             _serviceProvider.GetService<ActivityManager>().LoadActivity(mainActivity);
