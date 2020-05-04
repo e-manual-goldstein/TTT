@@ -19,8 +19,7 @@ namespace TTT.Client
     {
         Cell[] _allCells;
         PlayerManager _playerManager;
-        float _screenWidth;
-        float _screenHeight;
+        
 
 
         public GameGrid(ActionService actionService, PlayerManager playerManager)
@@ -28,8 +27,6 @@ namespace TTT.Client
             _allCells = CreateCells(actionService);
             _playerManager = playerManager;
         }
-
-        public FrameLayout FrameLayout { get; set; }
 
         public Cell[] CreateCells(ActionService actionService)
         {
@@ -46,33 +43,11 @@ namespace TTT.Client
             return cells.ToArray();
         }
 
-        public void DrawCells(Activity context, GameState gameState)
-        {
-            var displayMetrics = context.Resources.DisplayMetrics;
-            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
-            var baseX = (displayMetrics.WidthPixels - (3 * Constants.CellSizeClient)) / 2;
-            var baseY = (displayMetrics.HeightPixels - (3 * Constants.CellSizeClient)) / 2;
-            foreach (var cell in _allCells)
-            {
-                var button = new Button(context);
-                button.LayoutParameters = baseLayout;
-                var x = baseX + (cell.I * Constants.CellSizeClient);
-                var y = baseY + (cell.J * Constants.CellSizeClient);
-                button.SetX(x);
-                button.SetY(y);
-                button.SetBackgroundColor(GetCellFromState(cell, gameState).Active ? Color.Red : Color.Gray);
-                button.SetTextColor(Color.White);
-                button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
-                button.Text = gameState == null ? null : GetCellFromState(cell, gameState).Marker.ToString();
-                if (_playerManager.IsMyTurn(gameState))
-                    button.Click += cell.ClickCell;
-                FrameLayout.AddView(button);
-            }
-        }
+        public Cell[] AllCells => _allCells;
 
-        private Cell GetCellFromState(Cell cell, GameState gameState)
+        public bool IsMyTurn(GameState gameState) 
         {
-            return gameState.Cells[cell.I, cell.J];
+            return _playerManager.IsMyTurn(gameState);
         }
     }   
 }

@@ -13,36 +13,37 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Microsoft.Extensions.DependencyInjection;
+using TTT.Client.Views;
 using TTT.Common;
 
 namespace TTT.Client
 {
     [Application(Name = "com.companyname.ttt.client.App", Theme = "@style/AppTheme.NoActionBar")]
-    public class App : Application
+    public class App : Application, Application.IActivityLifecycleCallbacks
     {
         #region App Instance
 
         //TODO: To be removed
-        static Lazy<App> _app = new Lazy<App>();
-        //TODO: To be removed
-        public static App Current { get => _app.Value; }
+        //static Lazy<App> _app = new Lazy<App>();
+        ////TODO: To be removed
+        //public static App Current { get => _app.Value; }
 
         #endregion
 
         #region Service Provider
         
         IServiceProvider _serviceProvider;
-        public IServiceProvider ServiceProvider => _serviceProvider;
-
+        ActivityManager _activityManager;
+        
         #endregion
 
         //TODO: To be removed
-        public App()
-        {
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-            _serviceProvider = serviceCollection.BuildServiceProvider();
-        }
+        //public App()
+        //{
+        //    var serviceCollection = new ServiceCollection();
+        //    ConfigureServices(serviceCollection);
+        //    _serviceProvider = serviceCollection.BuildServiceProvider();
+        //}
 
         public App(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {
@@ -54,7 +55,25 @@ namespace TTT.Client
         public override void OnCreate()
         {
             base.OnCreate();
+            RegisterActivityLifecycleCallbacks(this);
+            _activityManager = _serviceProvider.GetService<ActivityManager>();
+            _activityManager.RegisterAppContext(this);
+            #region Start Game
+            var mainMenu = _serviceProvider.GetService<MainMenu>();
+            var menuView = new MainMenuView(this, mainMenu, _activityManager);
+            
+            //replace with Reconnect + GetGameState
+                //AddGameGrid(new GameState(Guid.NewGuid(), null));
+            #endregion
         }
+
+        public override void OnTerminate()
+        {
+            base.OnTerminate();
+            UnregisterActivityLifecycleCallbacks(this);
+        }
+
+
 
         private void ConfigureServices(IServiceCollection services)
         {
@@ -74,13 +93,43 @@ namespace TTT.Client
             });
             services.AddSingleton<ActionService>();
             services.AddScoped<StateController>();
+            services.AddScoped<MainMenu>();
             services.AddScoped<GameGrid>();
         }
-        
-        //TODO: Is this supposed to be here?
-        internal void RegisterMainActivity(MainActivity mainActivity)
+       
+        public void OnActivityCreated(Activity activity, Bundle savedInstanceState)
         {
-            _serviceProvider.GetService<ActivityManager>().LoadActivity(mainActivity);
+            _activityManager.RegisterActivity(activity);
+        }
+
+        public void OnActivityDestroyed(Activity activity)
+        {
+            _activityManager.UnRegisterActivity(activity);
+        }
+
+        public void OnActivityPaused(Activity activity)
+        {
+            
+        }
+
+        public void OnActivityResumed(Activity activity)
+        {
+            
+        }
+
+        public void OnActivitySaveInstanceState(Activity activity, Bundle outState)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void OnActivityStarted(Activity activity)
+        {
+            _activityManager.LoadViewForActivity(activity);
+        }
+
+        public void OnActivityStopped(Activity activity)
+        {
+            //Unload?
         }
     }
 }

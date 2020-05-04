@@ -44,10 +44,10 @@ namespace TTT.Client
             {
                 _game = _serviceProvider.GetService<GameGrid>();
             }
-            var currentActivity = _activityManager.GetCurrentActivity();
-            _game.FrameLayout = new FrameLayout(currentActivity);
-            _game.DrawCells(currentActivity, gameState);
-            currentActivity.RunOnUiThread(() => currentActivity.SetContentView(_game.FrameLayout));
+            //var currentActivity = _activityManager.GetCurrentActivity();
+            //_game.FrameLayout = new FrameLayout(currentActivity);
+            //_game.DrawCells(currentActivity, gameState);
+            //currentActivity.RunOnUiThread(() => currentActivity.SetContentView(_game.FrameLayout));
         }
 
         public bool GameIsInProgress()
