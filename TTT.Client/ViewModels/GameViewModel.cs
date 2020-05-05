@@ -14,23 +14,18 @@ using TTT.Common;
 
 namespace TTT.Client
 {
-    public class GameView
+    public class GameViewModel : ViewModel<GameState>
     {
-        GameGrid _game;
-        Context _gameContext;
-        ActivityManager _activityManager;
 
-        public GameView(Context gameContext, GameGrid game, ActivityManager activityManager)
+        public GameViewModel(GameState game) : base(game)
         {
-            _game = game;
-            _gameContext = gameContext;
-            _activityManager = activityManager;
         }
 
         public void AddGameGrid(GameState gameState)
         {
-            var layout = DrawCells(_gameContext, gameState);
-            _activityManager.SetActivityView(typeof(GameActivity), layout);
+            var context = ActivityManager.CurrentContext();
+            var layout = DrawCells(context, gameState);
+            ActivityManager.SetActivityView(typeof(GameActivity), layout);
         }
 
         public FrameLayout DrawCells(Context context, GameState gameState)
@@ -40,7 +35,7 @@ namespace TTT.Client
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
             var baseX = (displayMetrics.WidthPixels - (3 * Constants.CellSizeClient)) / 2;
             var baseY = (displayMetrics.HeightPixels - (3 * Constants.CellSizeClient)) / 2;
-            foreach (var cell in _game.AllCells)
+            foreach (var cell in Model.Cells)
             {
                 var button = new Button(context);
                 button.LayoutParameters = baseLayout;
@@ -52,15 +47,21 @@ namespace TTT.Client
                 button.SetTextColor(Color.White);
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
                 button.Text = gameState == null ? null : GetCellFromState(cell, gameState).Marker.ToString();
-                if (_game.IsMyTurn(gameState))
+                if (GetService<PlayerManager>().IsMyTurn(gameState))
                     button.Click += cell.ClickCell;
                 layout.AddView(button);
             }
             return layout;
         }
+
+        public override void Show()
+        {
+            AddGameGrid(Model);
+        }
+
         private Cell GetCellFromState(Cell cell, GameState gameState)
         {
-            return gameState.Cells[cell.I, cell.J];
+            return gameState.Cells.Single(c => c.I == cell.I && c.J == cell.J);
         }
     }
 }

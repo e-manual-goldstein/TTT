@@ -17,43 +17,44 @@ namespace TTT.Client
 {
     public class GameManager
     {
-        GameGrid _game;
         IServiceProvider _serviceProvider;
         ActivityManager _activityManager;
+        ActionService _actionService;
         GameState _gameState;
 
-        public GameManager(IServiceProvider serviceProvider, ActivityManager activityManager)
+        public GameManager(IServiceProvider serviceProvider, ActivityManager activityManager, ActionService actionService)
         {
             _serviceProvider = serviceProvider;
             _activityManager = activityManager;
-        }
-
-        public GameGrid GetGame()
-        {
-            if (_game != null)
-            {
-                return _game;
-            }
-            return _game = _serviceProvider.GetService<GameGrid>();
+            _actionService = actionService;
         }
 
         public void LoadGame(GameState gameState, bool isNewGame = false)
         {
             _gameState = gameState;
-            if (isNewGame)
-            {
-                _game = _serviceProvider.GetService<GameGrid>();
-            }
+            //if (isNewGame)
+            //{
+            //    _game = _serviceProvider.GetService<GameGrid>();
+            //}
             //var currentActivity = _activityManager.GetCurrentActivity();
             //_game.FrameLayout = new FrameLayout(currentActivity);
             //_game.DrawCells(currentActivity, gameState);
             //currentActivity.RunOnUiThread(() => currentActivity.SetContentView(_game.FrameLayout));
         }
-
-        public bool GameIsInProgress()
+        
+        public Cell[] CreateCells()
         {
-            return _game != null;
+            var cells = new List<Cell>();
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    var cell = new Cell(i, j);
+                    cell.SetTakeTurnAction((c) => _actionService.TakeTurn(c));
+                    cells.Add(cell);
+                }
+            }
+            return cells.ToArray();
         }
-
     }
 }

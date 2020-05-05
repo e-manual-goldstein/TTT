@@ -13,7 +13,6 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Microsoft.Extensions.DependencyInjection;
-using TTT.Client.Views;
 using TTT.Common;
 
 namespace TTT.Client
@@ -21,29 +20,13 @@ namespace TTT.Client
     [Application(Name = "com.companyname.ttt.client.App", Theme = "@style/AppTheme.NoActionBar")]
     public class App : Application, Application.IActivityLifecycleCallbacks
     {
-        #region App Instance
-
-        //TODO: To be removed
-        //static Lazy<App> _app = new Lazy<App>();
-        ////TODO: To be removed
-        //public static App Current { get => _app.Value; }
-
-        #endregion
-
         #region Service Provider
         
         IServiceProvider _serviceProvider;
         ActivityManager _activityManager;
+        ViewModelManager _viewModelManager;
         
         #endregion
-
-        //TODO: To be removed
-        //public App()
-        //{
-        //    var serviceCollection = new ServiceCollection();
-        //    ConfigureServices(serviceCollection);
-        //    _serviceProvider = serviceCollection.BuildServiceProvider();
-        //}
 
         public App(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {
@@ -56,14 +39,21 @@ namespace TTT.Client
         {
             base.OnCreate();
             RegisterActivityLifecycleCallbacks(this);
+            
+            _viewModelManager = _serviceProvider.GetService<ViewModelManager>();
+            ConfigureViewModels();
+            
             _activityManager = _serviceProvider.GetService<ActivityManager>();
             _activityManager.RegisterAppContext(this);
+            
             #region Start Game
             var mainMenu = _serviceProvider.GetService<MainMenu>();
-            var menuView = new MainMenuView(this, mainMenu, _activityManager);
+            var vm = _viewModelManager.CreateViewModel(mainMenu);
+            vm.Show();
+            //var menuView = new MainMenuViewModel(this, mainMenu, _activityManager);
             
             //replace with Reconnect + GetGameState
-                //AddGameGrid(new GameState(Guid.NewGuid(), null));
+               
             #endregion
         }
 
@@ -72,8 +62,6 @@ namespace TTT.Client
             base.OnTerminate();
             UnregisterActivityLifecycleCallbacks(this);
         }
-
-
 
         private void ConfigureServices(IServiceCollection services)
         {
@@ -84,6 +72,7 @@ namespace TTT.Client
             services.AddSingleton<GameManager>();
             services.AddSingleton<MessageHandler>();
             services.AddSingleton<ExternalHostManager>();
+            services.AddSingleton<ViewModelManager>();
             services.AddSingleton<ControllerManager>(provider =>
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
@@ -94,9 +83,14 @@ namespace TTT.Client
             services.AddSingleton<ActionService>();
             services.AddScoped<StateController>();
             services.AddScoped<MainMenu>();
-            services.AddScoped<GameGrid>();
         }
        
+        private void ConfigureViewModels()
+        {
+            _viewModelManager.RegisterViewModel<MainMenu, MainMenuViewModel>();
+            _viewModelManager.RegisterViewModel<GameState, GameViewModel>();
+        }
+
         public void OnActivityCreated(Activity activity, Bundle savedInstanceState)
         {
             _activityManager.RegisterActivity(activity);

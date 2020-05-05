@@ -21,14 +21,21 @@ namespace TTT.Client
         PlayerManager _playerManager;
         ActivityManager _activityManager;
         GameManager _gameManager;
+        ViewModelManager _viewModelManager;
 
-        public MainMenu(ExternalHostManager externalHostManager, SocketManager socketManager, PlayerManager playerManager, ActivityManager activityManager, GameManager gameManager)
+        public MainMenu(ExternalHostManager externalHostManager, 
+                        SocketManager socketManager, 
+                        PlayerManager playerManager, 
+                        ActivityManager activityManager, 
+                        GameManager gameManager,
+                        ViewModelManager viewModelManager)
         {
             _externalHostManager = externalHostManager;
             _socketManager = socketManager;
             _playerManager = playerManager;
             _activityManager = activityManager;
             _gameManager = gameManager;
+            _viewModelManager = viewModelManager;
         }
 
         private void Connect(object sender, EventArgs e)
@@ -69,7 +76,13 @@ namespace TTT.Client
 
         private void Test(object sender, EventArgs e)
         {
-            var game = _gameManager.GetGame();
+            //var game = _gameManager.GetGame();
+            var gameView = _viewModelManager
+                .CreateViewModel(
+                    new GameState(Guid.NewGuid(), _gameManager.CreateCells()
+                )
+            );
+            gameView.Show();
             _activityManager.StartNewActivity(typeof(GameActivity));
         }
         

@@ -6,7 +6,7 @@ namespace TTT.Common
 {
     public class GameState
     {
-        public GameState(Guid currentPlayerId, Cell[,] cells)
+        public GameState(Guid currentPlayerId, Cell[] cells)
         {
             CurrentPlayerId = currentPlayerId;
             Cells = cells;
@@ -14,6 +14,6 @@ namespace TTT.Common
 
         public Guid CurrentPlayerId { get; private set; }
 
-        public Cell[,] Cells { get; private set; }
+        public Cell[] Cells { get; private set; }
     }
 }

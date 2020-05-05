@@ -29,7 +29,10 @@ namespace TTT.Client
 
         public void RegisterAppContext(Context appContext)
         {
-            _appContext = appContext;
+            if (_appContext != null)
+                throw new Exception("Cannot register more than one App Context");
+            _appContext = _currentContext = appContext;
+            _logger.Log("Registered App Context");
         }
 
         #endregion
@@ -39,6 +42,7 @@ namespace TTT.Client
         public void RegisterActivity(Activity activity)
         {
             RegisterActivity(activity.GetType());
+            _logger.Log($"Registered Activity: {activity.LocalClassName}");
         }
 
         private void RegisterActivity(Type activityType)
@@ -56,6 +60,7 @@ namespace TTT.Client
         public void UnRegisterActivity(Activity activity)
         {
             UnRegisterActivity(activity.GetType());
+            _logger.Log($"UnRegistered Activity: {activity.LocalClassName}");
         }
 
         private void UnRegisterActivity(Type activityType)
@@ -72,6 +77,7 @@ namespace TTT.Client
         public void SetActivityView(Activity activity, View view)
         {
             SetActivityView(activity.GetType(), view);
+            _logger.Log($"Set View For Activity: {activity.LocalClassName}");
         }
 
         public void SetActivityView(Type activityType, View view)
@@ -88,18 +94,28 @@ namespace TTT.Client
         public void LoadViewForActivity(Activity activity)
         {
             activity.SetContentView(LoadViewForActivityType(activity.GetType()));
-            ShowActivity(activity);
+            SetCurrentActivity(activity);
         }
 
-        private void ShowActivity(Activity activity)
+        public View LoadViewForActivityType(Type activityType)
+        {
+            if (!typeof(Activity).IsAssignableFrom(activityType))
+                throw new ArgumentException("Cannot load view for non-Activity types");
+            return _activityLookup[activityType];
+        }
+
+        private void SetCurrentActivity(Activity activity)
         {
             _currentContext = activity;
         }
+
+        #endregion
 
         public void StartNewActivity(Type type, bool useNewTask = false)
         {
             if (!typeof(Activity).IsAssignableFrom(type))
                 throw new ArgumentException("Invalid Activity type");
+            _logger.Log($"Starting New Activity: {type.Name}");
             if (useNewTask)
             {
                 var intent = new Intent(_appContext, type);
@@ -110,14 +126,13 @@ namespace TTT.Client
                 _currentContext.StartActivity(new Intent(_currentContext, type));
         }
 
-        public View LoadViewForActivityType(Type activityType)
+        #region Context
+
+        public Context CurrentContext()
         {
-            if (!typeof(Activity).IsAssignableFrom(activityType))
-                throw new ArgumentException("Cannot load view for non-Activity types");
-            return _activityLookup[activityType];
+            return _currentContext;
         }
 
         #endregion
-
     }
 }
