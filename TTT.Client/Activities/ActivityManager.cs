@@ -7,6 +7,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using TTT.Common;
@@ -17,8 +18,9 @@ namespace TTT.Client
     {
         Logger _logger;
         Context _appContext;
-        Dictionary<Type, View> _activityLookup = new Dictionary<Type, View>();
+        Dictionary<Type, FrameLayout> _activityLookup = new Dictionary<Type, FrameLayout>();
         Context _currentContext;
+        View _currentView;
 
         public ActivityManager(Logger logger)
         {
@@ -47,8 +49,7 @@ namespace TTT.Client
 
         private void RegisterActivity(Type activityType)
         {
-            if (!typeof(Activity).IsAssignableFrom(activityType))
-                throw new ArgumentException("Cannot register non-Activity types");
+            ValidateActivityType(activityType);
             if (!_activityLookup.ContainsKey(activityType))
                 _activityLookup[activityType] = null;
         }
@@ -65,8 +66,7 @@ namespace TTT.Client
 
         private void UnRegisterActivity(Type activityType)
         {
-            if (!typeof(Activity).IsAssignableFrom(activityType))
-                throw new ArgumentException("Cannot unregister view for non-Activity types");
+            ValidateActivityType(activityType);
             _activityLookup.Remove(activityType);
         }
 
@@ -74,17 +74,26 @@ namespace TTT.Client
 
         #region Set View
 
-        public void SetActivityView(Activity activity, View view)
+        public void SetActivityView(Activity activity, FrameLayout layout)
         {
-            SetActivityView(activity.GetType(), view);
-            _logger.Log($"Set View For Activity: {activity.LocalClassName}");
+            SetActivityView(activity.GetType(), layout);
         }
 
-        public void SetActivityView(Type activityType, View view)
+        public void SetActivityView(Type activityType, FrameLayout layout)
         {
-            if (!typeof(Activity).IsAssignableFrom(activityType))
-                throw new ArgumentException("Cannot set view for non-Activity types");
-            _activityLookup[activityType] = view;
+            ValidateActivityType(activityType);
+            _activityLookup[activityType] = layout;
+            _logger.Log($"Set View For Activity: {activityType.Name}");
+        }
+
+        internal void RunOnUiThread(Action<View> action)
+        {
+            
+        }
+
+        internal View CurrentView()
+        {
+            return _currentView;
         }
 
         #endregion
@@ -93,7 +102,9 @@ namespace TTT.Client
 
         public void LoadViewForActivity(Activity activity)
         {
-            activity.SetContentView(LoadViewForActivityType(activity.GetType()));
+            var view = LoadViewForActivityType(activity.GetType());
+            activity.SetContentView(view);
+            SetCurrentView(view);
             SetCurrentActivity(activity);
         }
 
@@ -109,13 +120,18 @@ namespace TTT.Client
             _currentContext = activity;
         }
 
+        private void SetCurrentView(View view)
+        {
+            _currentView = view;
+        }
+
         #endregion
 
         public void StartNewActivity(Type type, bool useNewTask = false)
         {
-            if (!typeof(Activity).IsAssignableFrom(type))
-                throw new ArgumentException("Invalid Activity type");
+            ValidateActivityType(type);
             _logger.Log($"Starting New Activity: {type.Name}");
+            SetCurrentView(_activityLookup[type]);
             if (useNewTask)
             {
                 var intent = new Intent(_appContext, type);
@@ -134,5 +150,20 @@ namespace TTT.Client
         }
 
         #endregion
+
+        public void AddToActivityView(Type activityType, View childView)
+        {
+            ValidateActivityType(activityType);
+            if (!_activityLookup.ContainsKey(activityType))
+                _activityLookup[activityType].AddView(childView);
+            else
+                _logger.Error($"View not found for activity: {activityType}");
+        }
+
+        private void ValidateActivityType(Type type)
+        {
+            if (!typeof(Activity).IsAssignableFrom(type))
+                throw new ArgumentException("Invalid Activity type");
+        }
     }
 }

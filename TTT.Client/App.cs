@@ -10,6 +10,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +43,8 @@ namespace TTT.Client
             
             _viewModelManager = _serviceProvider.GetService<ViewModelManager>();
             ConfigureViewModels();
-            
+            AttachSnackbarToLogger();
+
             _activityManager = _serviceProvider.GetService<ActivityManager>();
             _activityManager.RegisterAppContext(this);
             
@@ -55,6 +57,14 @@ namespace TTT.Client
             //replace with Reconnect + GetGameState
                
             #endregion
+        }
+
+        private void AttachSnackbarToLogger()
+        {
+            _serviceProvider.GetService<Logger>().MessageReceived += (string msg) =>
+            {
+                _activityManager.RunOnUiThread((view) => Snackbar.Make(view, msg, 5));
+            };
         }
 
         public override void OnTerminate()

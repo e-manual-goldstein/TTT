@@ -22,13 +22,15 @@ namespace TTT.Client
         ActivityManager _activityManager;
         GameManager _gameManager;
         ViewModelManager _viewModelManager;
+        Logger _logger;
 
         public MainMenu(ExternalHostManager externalHostManager, 
                         SocketManager socketManager, 
                         PlayerManager playerManager, 
                         ActivityManager activityManager, 
                         GameManager gameManager,
-                        ViewModelManager viewModelManager)
+                        ViewModelManager viewModelManager,
+                        Logger logger)
         {
             _externalHostManager = externalHostManager;
             _socketManager = socketManager;
@@ -36,6 +38,7 @@ namespace TTT.Client
             _activityManager = activityManager;
             _gameManager = gameManager;
             _viewModelManager = viewModelManager;
+            _logger = logger;
         }
 
         private void Connect(object sender, EventArgs e)
@@ -53,6 +56,11 @@ namespace TTT.Client
         }
 
         private void EventListener(object sender, EventArgs e)
+        {
+            _logger.Log("Hello");
+        }
+
+        private void ListenForGames(object sender, EventArgs e)
         {
             if (_socketManager.HostSocket == null || !_socketManager.HostSocket.IsOpen)
             {

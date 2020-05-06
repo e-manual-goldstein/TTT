@@ -29,7 +29,7 @@ namespace TTT.Client
             ActivityManager = GetService<ActivityManager>();
         }
 
-        protected TModel Model { get; set; }
+        protected TModel Model { get; private set; }
 
         public abstract void Show();
 

@@ -71,6 +71,7 @@
     <Compile Include="App.cs" />
     <Compile Include="GameManager.cs" />
     <Compile Include="Activities\MenuActivity.cs" />
+    <Compile Include="Menus\InGameMenu.cs" />
     <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="Network\ExternalHostManager.cs" />
     <Compile Include="Network\HostSocket.cs" />

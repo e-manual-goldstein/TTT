@@ -10,6 +10,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using TTT.Client.Menus;
 using TTT.Common;
 
 namespace TTT.Client
@@ -17,18 +18,21 @@ namespace TTT.Client
     public class GameViewModel : ViewModel<GameState>
     {
 
-        public GameViewModel(GameState game) : base(game)
-        {
-        }
+        public GameViewModel(GameState game) : base(game) { }
 
-        public void AddGameGrid(GameState gameState)
+        public override void Show()
         {
-            var context = ActivityManager.CurrentContext();
-            var layout = DrawCells(context, gameState);
+            var layout = CreateGameLayout(Model);
             ActivityManager.SetActivityView(typeof(GameActivity), layout);
         }
 
-        public FrameLayout DrawCells(Context context, GameState gameState)
+        private FrameLayout CreateGameLayout(GameState gameState)
+        {
+            var context = ActivityManager.CurrentContext();
+            return DrawCells(context, gameState);
+        }
+
+        private FrameLayout DrawCells(Context context, GameState gameState)
         {
             var layout = new FrameLayout(context);
             var displayMetrics = context.Resources.DisplayMetrics;
@@ -52,11 +56,6 @@ namespace TTT.Client
                 layout.AddView(button);
             }
             return layout;
-        }
-
-        public override void Show()
-        {
-            AddGameGrid(Model);
         }
 
         private Cell GetCellFromState(Cell cell, GameState gameState)
