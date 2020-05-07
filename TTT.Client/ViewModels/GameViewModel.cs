@@ -14,6 +14,8 @@ using Android.Views;
 using Android.Widget;
 using TTT.Client.Menus;
 using TTT.Common;
+using WebSocket4Net.Command;
+using LayoutParams = Android.Widget.FrameLayout.LayoutParams;
 
 namespace TTT.Client
 {
@@ -60,46 +62,58 @@ namespace TTT.Client
             }
         }
 
-        private void DrawToolbar(Context context, FrameLayout layout)
+        private void DrawToolbar(Context context, FrameLayout parentLayout)
         {
-            var button = new Button(context) { };
-            button.LayoutParameters = new FrameLayout.LayoutParams(DisplayMetrics.WidthPixels, 200);
-            button.SetBackgroundColor(Color.Khaki);
-            button.Text = "Logs";
-            button.TextAlignment = TextAlignment.ViewStart;
-            //var menu = new InGameMenu(ActivityManager);
-            //foreach (var actionMethod in menu.GetType().GetMenuActions())
-            //{
-            //    //var toolbarItem = new ToolbarItem();
-            //    //toolbarItem.Text = actionMethod.Key;
-            //    //toolbarItem.Clicked += (object sender, EventArgs e) =>
-            //    //{
-            //    //    actionMethod.Value.Invoke(menu, new object[] { });
-            //    //};
-            //    //toolbar.AddView(toolbarItem);
-            //}
-            //toolbar.Visibility = ViewStates.Visible;
-            //layout.AddView(toolbar, 0);
+            var toolbarLayout = new FrameLayout(context) { };
+            toolbarLayout.Visibility = ViewStates.Visible;
+            
+            
+            var retractedLayout = new LayoutParams((int)(DisplayMetrics.WidthPixels * 0.9), 200, GravityFlags.Center);
+            var textBox = new TextView(context);
+            
+            RetractToolbar(toolbarLayout, textBox, retractedLayout);
+            
             bool expanded = false;
-            button.Click += (object sender, EventArgs eventArgs) =>
+            toolbarLayout.Click += (object sender, EventArgs eventArgs) =>
             {
-                expanded = ToggleExpand(sender as Button, expanded);
+                var expandedLayout = new LayoutParams((int)(DisplayMetrics.WidthPixels * 0.9), 800, GravityFlags.Center);
+                expanded = ToggleExpand(textBox, expanded, expandedLayout, retractedLayout);
             };
+            
+            toolbarLayout.AddView(textBox, 0);
+            parentLayout.AddView(toolbarLayout, 0);
         }
 
-        private bool ToggleExpand(Button button, bool expanded)
+        private bool ToggleExpand(TextView textBox, bool expanded, LayoutParams expandedLayout, LayoutParams retractedLayout)
         {
+            var toolbarLayout = textBox.Parent as FrameLayout;
             if (!expanded)
             {
-                button.Text = Logger.ReadFromLog(10);
-                button.LayoutParameters = new FrameLayout.LayoutParams(DisplayMetrics.WidthPixels, 800);
+                ExpandToolbar(toolbarLayout, textBox, expandedLayout);
             }
             else 
             {
-                button.Text = "Logs";
-                button.LayoutParameters = new FrameLayout.LayoutParams(DisplayMetrics.WidthPixels, 200);
+                RetractToolbar(toolbarLayout, textBox, retractedLayout);
             };
             return !expanded;
+        }
+
+        private void RetractToolbar(FrameLayout toolbarLayout, TextView textBox, LayoutParams retractedLayout)
+        {
+            textBox.Text = "Logs";
+            textBox.LayoutParameters = retractedLayout;
+            textBox.Gravity = GravityFlags.Left | GravityFlags.CenterVertical;
+            toolbarLayout.SetBackgroundColor(Color.Khaki);
+            toolbarLayout.LayoutParameters = new LayoutParams(DisplayMetrics.WidthPixels, 200);
+        }
+
+        private void ExpandToolbar(FrameLayout toolbarLayout, TextView textBox, LayoutParams expandedLayout)
+        {
+            textBox.Text = Logger.ReadFromLog();
+            textBox.LayoutParameters = expandedLayout;
+            textBox.Gravity = GravityFlags.Left | GravityFlags.Bottom;
+            toolbarLayout.SetBackgroundColor(Color.DarkSeaGreen);
+            toolbarLayout.LayoutParameters = new LayoutParams(DisplayMetrics.WidthPixels, 800);
         }
 
         private Cell GetCellFromState(Cell cell, GameState gameState)

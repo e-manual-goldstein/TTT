@@ -34,7 +34,7 @@ namespace TTT.Client
             if (_appContext != null)
                 throw new Exception("Cannot register more than one App Context");
             _appContext = _currentContext = appContext;
-            _logger.Log("Registered App Context");
+            _logger.Debug("Registered App Context");
         }
 
         #endregion
@@ -44,7 +44,7 @@ namespace TTT.Client
         public void RegisterActivity(Activity activity)
         {
             RegisterActivity(activity.GetType());
-            _logger.Log($"Registered Activity: {activity.LocalClassName}");
+            _logger.Debug($"Registered Activity: {activity.LocalClassName}");
         }
 
         private void RegisterActivity(Type activityType)
@@ -61,7 +61,7 @@ namespace TTT.Client
         public void UnRegisterActivity(Activity activity)
         {
             UnRegisterActivity(activity.GetType());
-            _logger.Log($"UnRegistered Activity: {activity.LocalClassName}");
+            _logger.Debug($"UnRegistered Activity: {activity.LocalClassName}");
         }
 
         private void UnRegisterActivity(Type activityType)
@@ -83,7 +83,7 @@ namespace TTT.Client
         {
             ValidateActivityType(activityType);
             _activityLookup[activityType] = layout;
-            _logger.Log($"Set View For Activity: {activityType.Name}");
+            _logger.Debug($"Set View For Activity: {activityType.Name}");
         }
 
         internal void RunOnUiThread(Action<View> action)
@@ -130,7 +130,7 @@ namespace TTT.Client
         public void StartNewActivity(Type type, bool useNewTask = false)
         {
             ValidateActivityType(type);
-            _logger.Log($"Starting New Activity: {type.Name}");
+            _logger.Debug($"Starting New Activity: {type.Name}");
             SetCurrentView(_activityLookup[type]);
             if (useNewTask)
             {
@@ -157,7 +157,7 @@ namespace TTT.Client
             if (!_activityLookup.ContainsKey(activityType))
                 _activityLookup[activityType].AddView(childView);
             else
-                _logger.Error($"View not found for activity: {activityType}");
+                _logger.Warning($"View not found for activity: {activityType}");
         }
 
         private void ValidateActivityType(Type type)

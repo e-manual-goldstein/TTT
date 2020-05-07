@@ -9,10 +9,13 @@ namespace TTT.Common
     public class Logger
     {
         string[] _inMemoryLog = new string[] { };
+        Verbosity _verbosity = Verbosity.Warn;
 
         public Logger()
         {
-            
+#if DEBUG
+            _verbosity = Verbosity.Debug;
+#endif
         }
 
         public void Log(string message)
@@ -23,22 +26,25 @@ namespace TTT.Common
                 MessageReceived(message);
         }
 
+        public void Debug(string message)
+        {
+            if (_verbosity >= Verbosity.Debug)
+                Log($"[Debug] {message}");
+        }
+
         public void Warning(string message) 
         {
-            Console.WriteLine($"[WARN] {message}");
-            LogInMemory(message);
-            if (MessageReceived != null)
-                MessageReceived($"[WARN] {message}");
+            if (_verbosity >= Verbosity.Warn)
+                Log($"[WARN] {message}");
         }
 
         public void Error(string message)
         {
-            Console.WriteLine($"[ERROR] {message}");
-            LogInMemory(message);
-            var stackTrace = new StackTrace();
-            Console.WriteLine(stackTrace);
-            if (MessageReceived != null)
-                MessageReceived($"[ERROR] {message}");
+            if (_verbosity >= Verbosity.Error)
+            {
+                Log($"[ERROR] {message}");
+                Log($"{new StackTrace()}");
+            }
         }
 
         public event MessageReceivedEvent MessageReceived;
@@ -59,5 +65,12 @@ namespace TTT.Common
             }
             return sb.ToString();
         }
+    }
+    public enum Verbosity
+    {
+        Error = 0,
+        Warn = 1,
+        Log = 2,
+        Debug = 3
     }
 }
