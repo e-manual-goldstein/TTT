@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using TTT.Common;
 
 namespace TTT.Client.Menus
 {
@@ -21,6 +22,7 @@ namespace TTT.Client.Menus
             _activityManager = activityManager;
         }
 
+        [MenuAction]
         public void QuitGame()
         {
             _activityManager.StartNewActivity(typeof(MenuActivity));

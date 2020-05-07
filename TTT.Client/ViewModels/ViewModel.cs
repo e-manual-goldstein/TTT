@@ -7,9 +7,11 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Microsoft.Extensions.DependencyInjection;
+using TTT.Common;
 
 namespace TTT.Client
 {
@@ -18,6 +20,7 @@ namespace TTT.Client
         private IServiceProvider _serviceProvider;
 
         protected ActivityManager ActivityManager { get; private set; }
+        protected Logger Logger { get; private set; }
         protected ViewModel(TModel model)
         {
             Model = model;
@@ -27,15 +30,25 @@ namespace TTT.Client
         {
             _serviceProvider = serviceProvider;
             ActivityManager = GetService<ActivityManager>();
+            Logger = GetService<Logger>();
+            Draw();
         }
 
         protected TModel Model { get; private set; }
 
-        public abstract void Show();
+        protected abstract void Draw();
 
         protected TService GetService<TService>()
         {
             return _serviceProvider.GetService<TService>();
-        }        
+        }
+        
+        protected DisplayMetrics DisplayMetrics
+        {
+            get
+            {
+                return ActivityManager.CurrentContext().Resources.DisplayMetrics;
+            }
+        }
     }
 }

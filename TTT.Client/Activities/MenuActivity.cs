@@ -23,6 +23,7 @@ namespace TTT.Client
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
             
+            
 
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
             

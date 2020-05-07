@@ -86,11 +86,8 @@ namespace TTT.Client
         {
             //var game = _gameManager.GetGame();
             var gameView = _viewModelManager
-                .CreateViewModel(
-                    new GameState(Guid.NewGuid(), _gameManager.CreateCells()
-                )
+                .CreateViewModel(new GameState(Guid.NewGuid(), _gameManager.CreateCells())
             );
-            gameView.Show();
             _activityManager.StartNewActivity(typeof(GameActivity));
         }
         

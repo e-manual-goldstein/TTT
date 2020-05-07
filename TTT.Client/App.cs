@@ -51,7 +51,6 @@ namespace TTT.Client
             #region Start Game
             var mainMenu = _serviceProvider.GetService<MainMenu>();
             var vm = _viewModelManager.CreateViewModel(mainMenu);
-            vm.Show();
             //var menuView = new MainMenuViewModel(this, mainMenu, _activityManager);
             
             //replace with Reconnect + GetGameState
@@ -63,7 +62,12 @@ namespace TTT.Client
         {
             _serviceProvider.GetService<Logger>().MessageReceived += (string msg) =>
             {
-                _activityManager.RunOnUiThread((view) => Snackbar.Make(view, msg, 5));
+                //_activityManager.RunOnUiThread((view) => Snackbar.Make(view, msg, 5));
+                var view = _activityManager.CurrentView();
+                if (view != null)
+                Snackbar.Make(view, msg, Snackbar.LengthLong)
+                        .SetAction("Action", (Android.Views.View.IOnClickListener)null)
+                        .Show();
             };
         }
 

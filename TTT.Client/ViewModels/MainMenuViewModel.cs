@@ -21,7 +21,7 @@ namespace TTT.Client
 
         }
 
-        public override void Show()
+        protected override void Draw()
         {
             AddButtons(Model.CreateActionDictionary());
         }
@@ -29,9 +29,8 @@ namespace TTT.Client
         private void AddButtons(IDictionary<string, EventHandler> callbackDictionary)
         {
             var context = ActivityManager.CurrentContext();
-            var metrics = context.Resources.DisplayMetrics;
-            var width = metrics.WidthPixels;
-            var height = metrics.HeightPixels;
+            var width = DisplayMetrics.WidthPixels;
+            var height = DisplayMetrics.HeightPixels;
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
             var baseX = (width - Constants.CellSizeClient) / 2;
             var frameLayout = new FrameLayout(context);
