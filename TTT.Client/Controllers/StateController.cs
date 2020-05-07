@@ -24,7 +24,7 @@ namespace TTT.Client
 
         public void UpdateState(UpdateStateCommand updateStateCommand)
         {
-            _gameManager.LoadGame(updateStateCommand.GameState, updateStateCommand.IsNewGame);
+            _gameManager.LoadGameState(updateStateCommand.GameState, updateStateCommand.IsNewGame);
         }
     }
 }

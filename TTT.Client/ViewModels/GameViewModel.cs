@@ -41,7 +41,7 @@ namespace TTT.Client
 
         private void DrawCells(Context context, GameState gameState, FrameLayout layout)
         {
-            var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
+            var baseLayout = new LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
             var baseX = (DisplayMetrics.WidthPixels - (3 * Constants.CellSizeClient)) / 2;
             var baseY = (DisplayMetrics.HeightPixels - (3 * Constants.CellSizeClient)) / 2;
             foreach (var cell in Model.Cells)

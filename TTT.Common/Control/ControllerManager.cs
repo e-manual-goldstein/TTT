@@ -22,10 +22,14 @@ namespace TTT.Common
 
         public string ExecuteCommand(GameCommand gameCommand)
         {
+            _logger.Debug($"Executing Command: {gameCommand.CommandType.Name}");
             if (!_actionDictionary.ContainsKey(gameCommand.CommandType))
             {
                 if (!FindAction(gameCommand.CommandType))
-                    return "Unknown command";
+                {
+                    _actionDictionary.Remove(gameCommand.CommandType);
+                    throw new ApplicationException("Unknown Command");
+                };
             }
             var action = _actionDictionary[gameCommand.CommandType];
             return CreateControllerAndExecuteCommand(action.DeclaringType, gameCommand);
@@ -41,6 +45,10 @@ namespace TTT.Common
         private string CreateControllerAndExecuteCommand(Type controllerType, GameCommand gameCommand)
         {
             var controller = _serviceProvider.GetService(controllerType);
+            if (controller == null)
+            {
+                throw new ApplicationException("Controller not found");
+            }
             _actionDictionary[gameCommand.CommandType].Invoke(controller, new object[] { gameCommand.SubCommand() });
             return "";
         }

@@ -20,26 +20,25 @@ namespace TTT.Client
         IServiceProvider _serviceProvider;
         ActivityManager _activityManager;
         ActionService _actionService;
+        ViewModelManager _viewModelManager;
         GameState _gameState;
 
-        public GameManager(IServiceProvider serviceProvider, ActivityManager activityManager, ActionService actionService)
+        public GameManager(IServiceProvider serviceProvider, ActivityManager activityManager, ActionService actionService, ViewModelManager viewModelManager)
         {
             _serviceProvider = serviceProvider;
             _activityManager = activityManager;
             _actionService = actionService;
+            _viewModelManager = viewModelManager;
         }
 
-        public void LoadGame(GameState gameState, bool isNewGame = false)
+        public void LoadGameState(GameState gameState, bool isNewGame = false)
         {
-            _gameState = gameState;
-            //if (isNewGame)
-            //{
-            //    _game = _serviceProvider.GetService<GameGrid>();
-            //}
-            //var currentActivity = _activityManager.GetCurrentActivity();
-            //_game.FrameLayout = new FrameLayout(currentActivity);
-            //_game.DrawCells(currentActivity, gameState);
-            //currentActivity.RunOnUiThread(() => currentActivity.SetContentView(_game.FrameLayout));
+            _viewModelManager.CreateViewModel(gameState);
+            if (isNewGame)
+            {
+                _activityManager.StartNewActivity(typeof(GameActivity));
+            }
+            
         }
         
         public Cell[] CreateCells()

@@ -15,7 +15,7 @@ namespace TTT.Host
     public class Game //: IUpdatingElement
     {
         Guid _gameId;
-        Cell[,] _cellGrid;
+        Cell[] _cellGrid;
         List<Cell> _allCells = new List<Cell>();
         Cell[][] _sets;
        
@@ -45,7 +45,7 @@ namespace TTT.Host
             return cells;
         }
 
-        public Cell[,] GameCells 
+        public Cell[] GameCells 
         {
             get
             {
@@ -55,7 +55,7 @@ namespace TTT.Host
 
         public void TakePlayerTurn(Guid playerId, Cell cell)
         {
-            GameCells[cell.I, cell.J].UpdateValue(_players[playerId]);
+            GameCells.Single(c => c.I == cell.I && c.J == cell.J).UpdateValue(_players[playerId]);
             if (GameOver())
             {
                 _endGame.Invoke(this, new EndGameEventArgs() { Winner = playerId, WinningSet = GetWinningSet() });
@@ -70,12 +70,12 @@ namespace TTT.Host
         internal void StartAtEndGame()
         {
             _currentPlayerId = _players.Keys.First();
-            _cellGrid[1, 1].UpdateValue(Marker.X);
-            _cellGrid[2, 1].UpdateValue(Marker.O);
-            _cellGrid[0, 2].UpdateValue(Marker.X);
-            _cellGrid[2, 0].UpdateValue(Marker.O);
-            _cellGrid[2, 2].UpdateValue(Marker.X);
-            _cellGrid[1, 2].UpdateValue(Marker.O);
+            GameCells.Single(c => c.I == 1 && c.J == 1).UpdateValue(Marker.X);
+            GameCells.Single(c => c.I == 2 && c.J == 1).UpdateValue(Marker.O);
+            GameCells.Single(c => c.I == 0 && c.J == 2).UpdateValue(Marker.X);
+            GameCells.Single(c => c.I == 2 && c.J == 0).UpdateValue(Marker.O);
+            GameCells.Single(c => c.I == 2 && c.J == 2).UpdateValue(Marker.X);
+            GameCells.Single(c => c.I == 1 && c.J == 2).UpdateValue(Marker.O);
         }
 
         public void StartRandomPlayer()
@@ -93,15 +93,17 @@ namespace TTT.Host
             return _sets.Where(s => Math.Abs(s.Sum(c => (int)(c.Marker ?? 0))) == 3).First();
         }
 
-        public Cell[,] CreateCellArray()
+        public Cell[] CreateCellArray()
         {
-            var cellArray = new Cell[3, 3];
+            var cellArray = new Cell[9];
+            int count = 0;
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    cellArray[i,j] = new Cell(i, j);
-                    _allCells.Add(cellArray[i, j]);
+                    cellArray[count] = new Cell(i, j);
+                    _allCells.Add(cellArray[count]);
+                    count++;
                 }
             }
             return cellArray;

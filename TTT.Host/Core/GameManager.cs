@@ -12,24 +12,27 @@ namespace TTT.Host
         ISocketHub _socketHub;
         Game _currentGame;
         ViewManager _viewManager;
+        Logger _logger;
 
-        public GameManager(ViewManager viewManager, ISocketHub socketHub)
+        public GameManager(ViewManager viewManager, ISocketHub socketHub, Logger logger)
         {
             _socketHub = socketHub;
             _viewManager = viewManager;
+            _logger = logger;
         }
         public Game CreateNewGame()
         {
             var gameId = Guid.NewGuid();
             _currentGame = new Game(gameId, TurnTaken, EndGame);
-            var gameView = new GameView(_currentGame);
-            _viewManager.SetContent(gameView);
-            _viewManager.Show();
+            _logger.Debug("Created New Game");            
             return _currentGame;
         }
 
         public Game StartGame()
         {
+            var gameView = new GameView(_currentGame);
+            _viewManager.SetContent(gameView);
+            _viewManager.Show();
             _viewManager.Update();
             return _currentGame;
         }

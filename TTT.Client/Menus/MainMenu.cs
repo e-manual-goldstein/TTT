@@ -43,7 +43,7 @@ namespace TTT.Client
 
         private void Connect(object sender, EventArgs e)
         {
-            RunOnUiThread(async () => {
+            Task.Run(async () => {
                 var ipEndpoint = await _externalHostManager.FindOnlineGame();
                 _socketManager.CreateSocket(ipEndpoint);
             });
@@ -51,11 +51,10 @@ namespace TTT.Client
 
         private void RunOnUiThread(Action action)
         {
-            //_serviceProvider.GetService<ActivityManager>()
-            //    .GetCurrentActivity().RunOnUiThread(action);
+            _activityManager.RunOnUiThread(action);
         }
 
-        private void EventListener(object sender, EventArgs e)
+        private void SayHello(object sender, EventArgs e)
         {
             _logger.Log("Hello");
         }
@@ -82,7 +81,7 @@ namespace TTT.Client
             }
         }
 
-        private void Test(object sender, EventArgs e)
+        private void StartGame(object sender, EventArgs e)
         {
             //var game = _gameManager.GetGame();
             var gameView = _viewModelManager
@@ -95,8 +94,8 @@ namespace TTT.Client
         {
             return new Dictionary<string, EventHandler>()
             {
-                { "LISTEN", new EventHandler(EventListener) },
-                { "TEST", new EventHandler(Test) },
+                { "HELLO", new EventHandler(SayHello) },
+                { "START", new EventHandler(StartGame) },
                 { "CONNECT", new EventHandler(Connect) }
             };
         }

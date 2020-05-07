@@ -20,6 +20,7 @@ namespace TTT.Client
         Context _appContext;
         Dictionary<Type, FrameLayout> _activityLookup = new Dictionary<Type, FrameLayout>();
         Context _currentContext;
+        
         View _currentView;
 
         public ActivityManager(Logger logger)
@@ -86,7 +87,7 @@ namespace TTT.Client
             _logger.Debug($"Set View For Activity: {activityType.Name}");
         }
 
-        internal void RunOnUiThread(Action<View> action)
+        internal void RunOnUiThread(Action action)
         {
             
         }
@@ -103,6 +104,7 @@ namespace TTT.Client
         public void LoadViewForActivity(Activity activity)
         {
             var view = LoadViewForActivityType(activity.GetType());
+            
             activity.SetContentView(view);
             SetCurrentView(view);
             SetCurrentActivity(activity);

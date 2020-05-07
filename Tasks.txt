@@ -1,23 +1,18 @@
+[Client] Create APK
+[Client] Investigate Garbage Collection - check for Memory Leaks in ActivityManager implementation
 [Client] Add Toolbar/InGameMenu to GameViewModel
-	[Client] Add Persisted Logs
-[Client] Add "Connected" message when websocket successfully connects
+[Client] Add Persisted Logs
 [Relay] Encrypt IP Addresses
-[Client] Add "Look for games" function
 [Host] Add navigation buttons to <GameView>
 [Relay] <Client>
 [Relay] Add PortNo to <Host>
 [Relay] Convert to WebApi
 	[Client] Remove "usesCleartextTraffic" option
--------------------------PHASE 2---------------------------------------------------
 
 [Client] Store host address in Activity.OnSaveInstanceState
 	[Host] <SocketHub> Add receiver configured to accept reconnection attempts
 		[Client] If game is in progress and no connection available, attempt to reconnect
-
-[Client] Create new Activity for playing an active game
-	[Client] MainActivity should be used for main menu
-
-[Client] Primary lifecycle of application should be based on "Scenes" (Activities)
+		
 [Host] Game should auto-start when two clients connected
 
 --------------------NOT MVP--------------------------------------------------------
@@ -61,3 +56,8 @@ COMPLETE
 [Client] Separate UI from Game Logic
 [Client] Add some form of message display facility. 
 [Client] Add InMemory Logs
+[Client] Create new Activity for playing an active game
+[Client] MainActivity should be used for main menu
+[Client] Primary lifecycle of application should be based on "Scenes" (Activities)
+[Client] Add "Connected" message when websocket successfully connects
+[Client] Add (Connect) "Look for games" function

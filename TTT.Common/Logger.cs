@@ -29,7 +29,7 @@ namespace TTT.Common
         public void Debug(string message)
         {
             if (_verbosity >= Verbosity.Debug)
-                Log($"[Debug] {message}");
+                Log($"[DEBUG] {message}");
         }
 
         public void Warning(string message) 
@@ -44,6 +44,15 @@ namespace TTT.Common
             {
                 Log($"[ERROR] {message}");
                 Log($"{new StackTrace()}");
+            }
+        }
+
+        public void Error(Exception exception)
+        {
+            if (_verbosity >= Verbosity.Error)
+            {
+                Log($"[ERROR] {exception.Message}");
+                Log($"{exception.StackTrace}");
             }
         }
 
@@ -68,9 +77,9 @@ namespace TTT.Common
     }
     public enum Verbosity
     {
+        Silent = -1,
         Error = 0,
         Warn = 1,
-        Log = 2,
-        Debug = 3
+        Debug = 2
     }
 }

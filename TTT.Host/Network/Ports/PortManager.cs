@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NATUPNPLib; 
+using NATUPNPLib;
+using TTT.Common;
 
 namespace TTT.Host
 {
@@ -10,25 +11,33 @@ namespace TTT.Host
     {
         UPnPNATClass _upnpnat;
         List<IStaticPortMapping> _portList;
+        Logger _logger;
 
-        public PortManager()
+        public PortManager(Logger logger)
         {
+            _logger = logger;
             _upnpnat = new UPnPNATClass();
         }
         public void EnsurePortIsForwarded(PortForwardSettings portForwardSettings)
         {
             if (PortIsForwarded(portForwardSettings))
+            {
+                _logger.Warning("Port is already forwarded");
                 return; //No need to do anything
+            }
             if (PortIsDisabled(portForwardSettings))
             {
+                _logger.Warning("Port is disabled");
                 EnablePort(portForwardSettings); // Just enable the port as all other settings are correct
                 return;
             }
             if (PortIsInUse(portForwardSettings.ExternalPort, portForwardSettings.Protocol))
             {
-                //Can't change settings
-                throw new InvalidPortException($"Port ({portForwardSettings.ExternalPort}) is already reserved for another {portForwardSettings.Protocol} use. Choose a different port"); //
+                var exception = new InvalidPortException($"Port ({portForwardSettings.ExternalPort}) is already reserved for another {portForwardSettings.Protocol} use. Choose a different port");
+                _logger.Error(exception);
+                throw exception;
             }
+            _logger.Debug("Forwarding Port for external connections");
             _upnpnat.StaticPortMappingCollection
                 .Add(portForwardSettings.ExternalPort, portForwardSettings.Protocol.ToString(), 
                 portForwardSettings.InternalPort, portForwardSettings.InternalIPAddress, true, portForwardSettings.Description);
@@ -42,6 +51,7 @@ namespace TTT.Host
 
         private void EnablePort(PortForwardSettings portForwardSettings)
         {
+            _logger.Debug("Enabling Port Forward");
             MatchingPorts(portForwardSettings, false).Single().Enable(true);
         }
 

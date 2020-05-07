@@ -15,7 +15,8 @@ namespace TTT.Client
 {
     public class ViewModelManager
     {
-        Dictionary<Type, Type> _viewModelLookup = new Dictionary<Type, Type>();
+        Dictionary<Type, Type> _viewModelTypeLookup = new Dictionary<Type, Type>();
+        
         IServiceProvider _serviceProvider;
         public ViewModelManager(IServiceProvider serviceProvider)
         {
@@ -26,17 +27,23 @@ namespace TTT.Client
             where TModel : class 
             where TViewModel : ViewModel<TModel>
         {
-            _viewModelLookup[typeof(TModel)] = typeof(TViewModel);
+            _viewModelTypeLookup[typeof(TModel)] = typeof(TViewModel);
         }
 
         
         public ViewModel<TModel> CreateViewModel<TModel>(TModel model) 
             where TModel : class
         {
-            var viewModelType = _viewModelLookup[model.GetType()];
+            var viewModelType = _viewModelTypeLookup[model.GetType()];
             var viewModel = Activator.CreateInstance(viewModelType, new object[] { model }) as ViewModel<TModel>;
             viewModel.Init(_serviceProvider);
             return viewModel;
+        }
+
+        public ViewModel<TModel> UpdateViewModel<TModel>(TModel model)
+            where TModel : class
+        {
+            throw new Exception();
         }
     }
 }

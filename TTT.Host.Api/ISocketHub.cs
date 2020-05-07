@@ -9,10 +9,9 @@ namespace TTT.Host.Api
     {
         int ServerPort { get; }
         IPAddress ServerAddress { get; }
-
         void BroadcastCommand(GameCommand gameCommand);
         Task<Guid> ConnectAsync(bool useThreading = false);
         Task<Guid> BeginListening();
-
+        void SendCommand(Guid userId, GameCommand message);
     }
 }

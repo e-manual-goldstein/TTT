@@ -4,15 +4,17 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using TTT.Common;
 using WebSocket4Net;
+using ErrorEventArgs = SuperSocket.ClientEngine.ErrorEventArgs;
 
 namespace TTT.Client
 {
     public class SocketManager
     {
-        HostSocket _hostSocket;
         Logger _logger;
         ControllerManager _controllerManager;
-        bool _listening;
+
+        HostSocket _hostSocket;
+        public HostSocket HostSocket => _hostSocket;
 
         public SocketManager(Logger logger, ControllerManager controllerManager)
         {
@@ -22,7 +24,6 @@ namespace TTT.Client
 
         public async Task<Guid> Listen()
         {
-            _listening = true;
             var targetEndPoint = new IPEndPoint(IPAddress.Any, Constants.SERVER_LISTEN_PORT);
             Guid clientId = Guid.Empty;
             using (var listener = new UdpClient(targetEndPoint) { EnableBroadcast = true })
@@ -33,8 +34,8 @@ namespace TTT.Client
                         var message = UdpMessage.FromByteArray(task.Result.Buffer);
                         if (Guid.TryParse(message.Payload, out clientId))
                         {
-                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, new EventHandler<MessageReceivedEventArgs>(processMessage), true);
-                            _listening = false;
+                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, true);
+                            AttachHandlers();
                         }
                     });
                 //_hostSocket.Send($"{clientId}");
@@ -50,12 +51,19 @@ namespace TTT.Client
                 _logger.Log(eventArgs.Message);
         }
 
-        public HostSocket HostSocket => _hostSocket;
 
         internal void CreateSocket(IPEndPoint ipEndpoint)
         {
-            _hostSocket = new HostSocket(ipEndpoint.Address, Guid.NewGuid(), new EventHandler<MessageReceivedEventArgs>(processMessage), true);
+            _hostSocket = new HostSocket(ipEndpoint.Address, Guid.NewGuid(), true);
+            AttachHandlers();
+        }
 
+        private void AttachHandlers()
+        {
+            _hostSocket.MessageReceived += processMessage;
+            _hostSocket.SocketError += (object sender, EventArgs eventArgs) => _logger.Error((eventArgs as ErrorEventArgs).Exception);
+            _hostSocket.SocketOpened += (object sender, EventArgs eventArgs) => _logger.Log("Connected to Host");
+            _hostSocket.SocketClosed += (object sender, EventArgs eventArgs) => _logger.Log("Lost connection to Host");
         }
     }
 }

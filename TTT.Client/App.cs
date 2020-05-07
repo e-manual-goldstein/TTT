@@ -50,7 +50,7 @@ namespace TTT.Client
             
             #region Start Game
             var mainMenu = _serviceProvider.GetService<MainMenu>();
-            var vm = _viewModelManager.CreateViewModel(mainMenu);
+            _viewModelManager.CreateViewModel(mainMenu);
             //var menuView = new MainMenuViewModel(this, mainMenu, _activityManager);
             
             //replace with Reconnect + GetGameState
@@ -91,11 +91,13 @@ namespace TTT.Client
             {
                 return new ControllerManager(provider, provider.GetService<Logger>(), new Type[]
                 {
-                    typeof(StateController)
+                    typeof(StateController),
+                    typeof(PlayerController)
                 });
             });
             services.AddSingleton<ActionService>();
             services.AddScoped<StateController>();
+            services.AddScoped<PlayerController>();
             services.AddScoped<MainMenu>();
         }
        

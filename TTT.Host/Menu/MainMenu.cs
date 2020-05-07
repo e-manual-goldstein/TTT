@@ -57,16 +57,20 @@ namespace TTT.Host
                 var game = _gameManager.CurrentGame();
                 Task.WaitAll(
                     _externalConnectionManager.OpenExternalSocket(Guid.NewGuid()),
-                    _socketHub.BeginListening().ContinueWith(task => game.AddPlayerToGame(task.Result))
-                );
-                _gameManager.StartGame();
+                    _socketHub.BeginListening().ContinueWith(task =>
+                    {
+                        var playerId = task.Result;
+                        var gameCommand = new GameCommand(new AssignPlayerCommand() { PlayerId = playerId });
+                        _socketHub.SendCommand(playerId, gameCommand);
+                        game.AddPlayerToGame(task.Result);
+                    })
+                );;
             });
             
         }
 
         public void Start()
         {
-            _gameManager.CreateNewGame();
             var game = _gameManager.CurrentGame();
             game.StartRandomPlayer();
             //game.StartAtEndGame();

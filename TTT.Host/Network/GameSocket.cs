@@ -122,7 +122,7 @@ namespace TTT.Host
                     _receiveCommandEvent.Invoke(this, new CommandReceivedEventArgs(gameCommand));
                 }
                 else
-                    _logger.Log($"Received message: {messageReceived}");
+                    _logger.Warning($"Unhandled message received: {messageReceived}");
             }
             else
                 _logger.Warning("mask bit not set");

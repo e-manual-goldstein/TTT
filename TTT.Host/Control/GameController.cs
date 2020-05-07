@@ -18,7 +18,7 @@ namespace TTT.Host.Control
 
         public void TakeTurn(TurnCommand turnCommand)
         {
-            _logger.Log($"Player: {turnCommand.PlayerId} takes turn {turnCommand.Cell}");
+            _logger.Debug($"Player: {turnCommand.PlayerId} takes turn {turnCommand.Cell}");
             _gameManager.CurrentGame().TakePlayerTurn(turnCommand.PlayerId, turnCommand.Cell);
         }
     }

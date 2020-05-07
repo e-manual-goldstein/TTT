@@ -44,7 +44,7 @@ namespace TTT.Host
                 Task.Run(() =>
                 {
                     var message = UdpMessage.FromByteArray(listener.Receive(ref targetEndPoint));
-                    _logger.Log(message.Payload + $"{targetEndPoint.Address}:{PORT_NO}");
+                    _logger.Debug(message.Payload + $"{targetEndPoint.Address}:{PORT_NO}");
                     _tcpListenerAddresss = targetEndPoint.Address;
                     _server = new TcpListener(targetEndPoint.Address, PORT_NO);
                     _server.Start();
@@ -62,7 +62,7 @@ namespace TTT.Host
 
         public async Task<Guid> ConnectAsync(bool useThreading = false)
         {
-            _logger.Log($"Accepting Clients");
+            _logger.Debug($"Accepting Clients");
             var source = new CancellationTokenSource();
             var socketId = Guid.NewGuid();
             var clientId = BeginListening(socketId, source);
@@ -76,9 +76,9 @@ namespace TTT.Host
         {
             await _server.AcceptTcpClientAsync().ContinueWith(async task => 
             {
-                _logger.Log($"Connecting Socket");
+                _logger.Debug($"Connecting Socket");
                 _activeSockets[socketId] = CreateSocket(task.Result);
-                _logger.Log("Cancelling Token");
+                _logger.Debug("Cancelling Token");
                 source.Cancel();
                 await OpenConnectionAsync(socketId);
                 return;
@@ -88,8 +88,10 @@ namespace TTT.Host
         public async Task<Guid> BeginListening()
         {
             var socketId = Guid.NewGuid();
+            _logger.Debug("Starting Tcp Server");
             await _server.AcceptTcpClientAsync().ContinueWith(async task =>
             {
+                _logger.Debug("Connection request received. Creating new Socket");
                 _activeSockets[socketId] = CreateSocket(task.Result);
                 await OpenConnectionAsync(socketId);
                 return;
@@ -124,7 +126,7 @@ namespace TTT.Host
             {
                 using (var broadcaster = new UdpClient() { EnableBroadcast = true })
                 {
-                    _logger.Log($"Pinging client...");
+                    _logger.Debug($"Pinging client...");
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         //TEST THIS
@@ -132,7 +134,7 @@ namespace TTT.Host
                         //Change this to Async? lol
 
                     }
-                    _logger.Log("Stopped Pinging...");
+                    _logger.Debug("Stopped Pinging...");
                 }
             }, cancellationToken);
         }
@@ -149,7 +151,7 @@ namespace TTT.Host
             Guid socketId = pinger.SocketId;
             using (var broadcaster = new UdpClient() { EnableBroadcast = true })
             {
-                _logger.Log($"Pinging client...");
+                _logger.Debug($"Pinging client...");
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     //TEST THIS
@@ -157,7 +159,7 @@ namespace TTT.Host
                     //Change this to Async? lol
 
                 }
-                _logger.Log("Stopped Pinging...");
+                _logger.Debug("Stopped Pinging...");
             }
         }
 
@@ -178,7 +180,7 @@ namespace TTT.Host
         {
             var socket = _activeSockets[id];
             var tcpClient = socket.Client;
-            _logger.Log("Handshake started");
+            _logger.Debug("Handshake started");
             while (true)
             {
                 while (socket.IsActive() && tcpClient.Available < 3)
@@ -200,7 +202,7 @@ namespace TTT.Host
                     Byte[] response = createWebSocketResponse(data);
                     socketStream.Write(response, 0, response.Length);
                     socket.ActiveStream = socketStream;
-                    //Output.Debug("Handshake complete");
+                    _logger.Debug("Handshake complete");
                 }
                 else
                 {
@@ -220,6 +222,11 @@ namespace TTT.Host
         public void SendMessage(Guid userId, string message)
         {
             _activeSockets[userId].Send(message);
+        }
+
+        public void SendCommand(Guid userId, GameCommand command)
+        {
+            _activeSockets[userId].Send(command);
         }
 
         public void CloseUserSocket(Guid userId)

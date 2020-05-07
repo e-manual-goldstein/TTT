@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Java.Net;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,24 +7,22 @@ using System.Net;
 using System.Threading;
 using TTT.Common;
 using WebSocket4Net;
-
+using ErrorEventArgs = SuperSocket.ClientEngine.ErrorEventArgs;
 namespace TTT.Client
 {
     public class HostSocket
     {
         IPAddress _serverAddress;
         Guid _clientId;
-        EventHandler<MessageReceivedEventArgs> _messageHandler;
         WebSocket _webSocket;
         bool _isOpen;
 
-        public HostSocket(IPAddress serverAddress, Guid clientId, EventHandler<MessageReceivedEventArgs> messageHandler, bool openSocket = false)
+        public HostSocket(IPAddress serverAddress, Guid clientId, bool openSocket = false)
         {
             _serverAddress = serverAddress;
-            _messageHandler = messageHandler;
             _clientId = clientId;
             if (openSocket)
-                _webSocket = openWebSocket(_messageHandler);
+                _webSocket = openWebSocket();
         }
 
         public bool IsOpen => _isOpen;
@@ -38,30 +37,43 @@ namespace TTT.Client
             _webSocket.Send(message);
         }
 
-        private WebSocket openWebSocket(EventHandler<MessageReceivedEventArgs> eventHandler)
+        private WebSocket openWebSocket()
         {
             var webSocketClient = new WebSocket($"ws://{_serverAddress}:58008/");
-            webSocketClient.Opened += new EventHandler(webSocketClient_Opened);
-            webSocketClient.Closed += new EventHandler(webSocketClient_Closed);
-            webSocketClient.MessageReceived += eventHandler;
+            webSocketClient.Opened += webSocketClient_Opened;
+            webSocketClient.Closed += webSocketClient_Closed;
             webSocketClient.Error += webSocketClient_Error;
+            webSocketClient.MessageReceived += (object sender, MessageReceivedEventArgs eventArgs) => MessageReceived(sender, eventArgs);
             webSocketClient.Open();
             return webSocketClient;
         }
 
-        protected void webSocketClient_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
+        private void webSocketClient_Error(object sender, ErrorEventArgs e)
         {
-            Console.WriteLine(e.Exception);
+            _isOpen = false;
+            SocketError(sender, e);
         }
 
         protected void webSocketClient_Closed(object sender, EventArgs e)
         {
+            if (_isOpen)
+                SocketClosed(sender, e);
             _isOpen = false;
         }
 
         protected void webSocketClient_Opened(object sender, EventArgs e)
         {
             _isOpen = true;
+            SocketOpened(sender, e);
         }
+
+        public delegate void SocketEventHandler(object sender, EventArgs eventArgs);
+
+        public event SocketEventHandler SocketOpened;
+        public event SocketEventHandler SocketClosed;
+        public event SocketEventHandler SocketError;
+
+        public delegate void MessageReceivedHandler(object sender, MessageReceivedEventArgs eventArgs);
+        public event MessageReceivedHandler MessageReceived;
     }
 }

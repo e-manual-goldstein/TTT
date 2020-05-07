@@ -28,7 +28,7 @@ namespace TTT.Host
             
         }
 
-        private Canvas DrawCells(Cell[,] cellGrid)
+        private Canvas DrawCells(Cell[] cellGrid)
         {            
             var canvases = new Dictionary<Cell, Canvas>();
 
