@@ -80,6 +80,7 @@ namespace TTT.Client
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<Logger>();
+            services.AddSingleton<CommandManager>();
             services.AddSingleton<PlayerManager>();
             services.AddSingleton<ActivityManager>();
             services.AddSingleton<SocketManager>();

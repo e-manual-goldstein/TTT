@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using Android.App;
@@ -17,18 +18,15 @@ namespace TTT.Client
 {
     public class GameManager
     {
-        IServiceProvider _serviceProvider;
         ActivityManager _activityManager;
-        ActionService _actionService;
         ViewModelManager _viewModelManager;
-        GameState _gameState;
+        Logger _logger;
 
-        public GameManager(IServiceProvider serviceProvider, ActivityManager activityManager, ActionService actionService, ViewModelManager viewModelManager)
+        public GameManager(Logger logger, ActivityManager activityManager, ViewModelManager viewModelManager)
         {
-            _serviceProvider = serviceProvider;
             _activityManager = activityManager;
-            _actionService = actionService;
             _viewModelManager = viewModelManager;
+            _logger = logger;
         }
 
         public void LoadGameState(GameState gameState, bool isNewGame = false)
@@ -38,7 +36,10 @@ namespace TTT.Client
             {
                 _activityManager.StartNewActivity(typeof(GameActivity));
             }
-            
+            else
+                _activityManager.LoadNewView(typeof(GameActivity));
+
+
         }
         
         public Cell[] CreateCells()
@@ -49,7 +50,6 @@ namespace TTT.Client
                 for (int j = 0; j < 3; j++)
                 {
                     var cell = new Cell(i, j);
-                    cell.SetTakeTurnAction((c) => _actionService.TakeTurn(c));
                     cells.Add(cell);
                 }
             }

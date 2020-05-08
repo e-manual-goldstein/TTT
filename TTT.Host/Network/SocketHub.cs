@@ -14,6 +14,7 @@ using TTT.Host.Control;
 using System.Threading;
 using TTT.Host.Api;
 using System.Net.Http;
+using System.Printing;
 
 namespace TTT.Host
 {
@@ -23,14 +24,16 @@ namespace TTT.Host
         const int PORT_NO = 69;
         Logger _logger;
         ControllerManager _controllerManager;
+        CommandManager _commandManager;
         IPAddress _tcpListenerAddresss;
         TcpListener _server;
         IDictionary<Guid, GameSocket> _activeSockets = new Dictionary<Guid, GameSocket>();
 
-        public SocketHub(Logger logger, ControllerManager controllerManager)
+        public SocketHub(Logger logger, ControllerManager controllerManager, CommandManager commandManager)
         {
             _logger = logger;
             _controllerManager = controllerManager;
+            _commandManager = commandManager;
             StartServer();
         }
 
@@ -85,6 +88,7 @@ namespace TTT.Host
             });
             return socketId;
         }
+
         public async Task<Guid> BeginListening()
         {
             var socketId = Guid.NewGuid();
@@ -97,21 +101,25 @@ namespace TTT.Host
                 return;
             });
             return socketId;
-        }
-
-       
+        }       
 
         private GameSocket CreateSocket(TcpClient client)
         {
-            var socket = new GameSocket(_logger);
+            var socket = new GameSocket(_logger, _commandManager);
             socket.Client = client;
-            socket.CommandReceived += HandleSocketCommand;
+            socket.CommandReceived += (object sender, CommandReceivedEventArgs e) => ProcessSocketCommand(socket, e.Command);
             return socket;
         }
 
-        private void HandleSocketCommand(object sender, CommandReceivedEventArgs e)
+        //private void HandleSocketCommand(object sender, CommandReceivedEventArgs e)
+        //{
+        //    _controllerManager.ExecuteCommand(e.Command);
+        //}
+
+        private void ProcessSocketCommand(GameSocket gameSocket, GameCommand gameCommand)
         {
-            _controllerManager.ExecuteCommand(e.Command);
+            _controllerManager.ExecuteCommand(gameCommand);
+            gameSocket.SendReceipt(gameCommand);
         }
 
         private void BroadcastInvitationOnThread(Guid socketId, CancellationToken cancellationToken)
@@ -219,14 +227,19 @@ namespace TTT.Host
             }
         }
 
-        public void SendMessage(Guid userId, string message)
+        public void VerifyBroadcastCommand(GameCommand command)
         {
-            _activeSockets[userId].Send(message);
+            Parallel.ForEach(_activeSockets.Values, socket => _commandManager.SendVerify(socket, command));
         }
+
+        //public void SendMessage(Guid userId, string message)
+        //{
+        //    _activeSockets[userId].Send(message);
+        //}
 
         public void SendCommand(Guid userId, GameCommand command)
         {
-            _activeSockets[userId].Send(command);
+            _commandManager.SendVerify(_activeSockets[userId], command);
         }
 
         public void CloseUserSocket(Guid userId)

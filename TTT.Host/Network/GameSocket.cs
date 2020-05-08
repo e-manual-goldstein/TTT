@@ -10,22 +10,26 @@ using TTT.Host.Control;
 
 namespace TTT.Host
 {
-    public class GameSocket
+    public class GameSocket : ISocket
     {
         Logger _logger;
+        CommandManager _commandManager;
+        bool _isOpen = true;
 
         public delegate void CommandReceivedEventHandler(object sender, CommandReceivedEventArgs gameCommand);
 
         event CommandReceivedEventHandler _receiveCommandEvent;
 
-        public GameSocket(Logger logger)
+        public GameSocket(Logger logger, CommandManager commandManager)
         {
             _logger = logger;
+            _commandManager = commandManager;
             KeepAlive = true;
         }
 
         public bool KeepAlive { get; private set; }
- 
+        public bool IsOpen => _isOpen;
+
         public NetworkStream ActiveStream { get; set; }
 
         public TcpClient Client { get; set; }
@@ -40,8 +44,9 @@ namespace TTT.Host
         {
             KeepAlive = false;
             ActiveStream = null;
+            _isOpen = false;
         }
-        public void Send(string message)
+        private void Send(string message)
         {
             var socketStream = ActiveStream;
             if (socketStream != null)
@@ -117,9 +122,16 @@ namespace TTT.Host
             else if (mask)
             {
                 string messageReceived = decodeMessage(bytes, offset, msglen);
-                if (GameCommand.TryParse(messageReceived, out GameCommand gameCommand))
+                if (Guid.TryParse(messageReceived, out Guid receiptId))
+                    _commandManager.LogReceipt(receiptId);
+                else if (GameCommand.TryParse(messageReceived, out GameCommand gameCommand))
                 {
-                    _receiveCommandEvent.Invoke(this, new CommandReceivedEventArgs(gameCommand));
+                    if (!_commandManager.IsProcessed(gameCommand))
+                    {
+                        _receiveCommandEvent.Invoke(this, new CommandReceivedEventArgs(gameCommand));
+                        _commandManager.LogReceipt(gameCommand.CommandId);
+                    }
+                    SendReceipt(gameCommand);
                 }
                 else
                     _logger.Warning($"Unhandled message received: {messageReceived}");
@@ -140,6 +152,9 @@ namespace TTT.Host
             return Encoding.UTF8.GetString(decoded);
         }
 
-
+        public void SendReceipt(GameCommand gameCommand)
+        {
+            Send(gameCommand.CommandId.ToString());
+        }
     }
 }

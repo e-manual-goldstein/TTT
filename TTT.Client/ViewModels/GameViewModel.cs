@@ -21,8 +21,10 @@ namespace TTT.Client
 {
     public class GameViewModel : ViewModel<GameState>
     {
-
-        public GameViewModel(GameState game) : base(game) { }
+        public GameViewModel(GameState game) : base(game)
+        {
+            
+        }
 
         protected override void Draw()
         {
@@ -57,8 +59,16 @@ namespace TTT.Client
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
                 button.Text = gameState == null ? null : GetCellFromState(cell, gameState).Marker.ToString();
                 if (GetService<PlayerManager>().IsMyTurn(gameState))
-                    button.Click += cell.ClickCell;
+                    button.Click += (object sender, EventArgs eventArgs) => ClickCell(cell);
                 layout.AddView(button);
+            }
+        }
+
+        private void ClickCell(Cell cell)
+        {
+            if (cell.Marker == null)
+            {
+                GetService<ActionService>().TakeTurn(cell);
             }
         }
 

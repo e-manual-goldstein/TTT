@@ -47,7 +47,7 @@ namespace TTT.Host
             var game = sender as Game;
             var gameState = game.GetCurrentState();
             var subCommand = new UpdateStateCommand(gameState, false);
-            _socketHub.BroadcastCommand(new GameCommand(subCommand));
+            _socketHub.BroadcastCommand(new GameCommand(subCommand, Guid.NewGuid()));
             _viewManager.Update();
         }
 

@@ -108,6 +108,12 @@ namespace TTT.Client
             activity.SetContentView(view);
             SetCurrentView(view);
             SetCurrentActivity(activity);
+            ViewUpdated += (View newView) =>
+            {
+                //Remove View?
+                activity.RunOnUiThread(() => activity.SetContentView(newView));
+                view.Dispose();
+            };
         }
 
         public View LoadViewForActivityType(Type activityType)
@@ -115,6 +121,12 @@ namespace TTT.Client
             if (!typeof(Activity).IsAssignableFrom(activityType))
                 throw new ArgumentException("Cannot load view for non-Activity types");
             return _activityLookup[activityType];
+        }
+
+        public void LoadNewView(Type activityType)
+        {
+            ValidateActivityType(activityType);
+            ViewUpdated.Invoke(_activityLookup[activityType]);
         }
 
         private void SetCurrentActivity(Activity activity)
@@ -126,6 +138,14 @@ namespace TTT.Client
         {
             _currentView = view;
         }
+
+        #endregion
+
+        #region View Updated Event
+
+        private delegate void ViewUpdatedEvent(View view);
+
+        private event ViewUpdatedEvent ViewUpdated;
 
         #endregion
 

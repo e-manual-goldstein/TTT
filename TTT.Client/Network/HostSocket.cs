@@ -10,23 +10,21 @@ using WebSocket4Net;
 using ErrorEventArgs = SuperSocket.ClientEngine.ErrorEventArgs;
 namespace TTT.Client
 {
-    public class HostSocket
+    public class HostSocket : ISocket
     {
         IPAddress _serverAddress;
-        Guid _clientId;
         WebSocket _webSocket;
         bool _isOpen;
 
-        public HostSocket(IPAddress serverAddress, Guid clientId, bool openSocket = false)
+        public HostSocket(IPAddress serverAddress, bool openSocket = false)
         {
             _serverAddress = serverAddress;
-            _clientId = clientId;
             if (openSocket)
                 _webSocket = openWebSocket();
         }
 
         public bool IsOpen => _isOpen;
-        public Guid ClientId => _clientId;
+        
         public void Send(GameCommand command)
         {
             Send(JsonConvert.SerializeObject(command));
@@ -50,7 +48,6 @@ namespace TTT.Client
 
         private void webSocketClient_Error(object sender, ErrorEventArgs e)
         {
-            _isOpen = false;
             SocketError(sender, e);
         }
 
@@ -59,6 +56,11 @@ namespace TTT.Client
             if (_isOpen)
                 SocketClosed(sender, e);
             _isOpen = false;
+        }
+
+        public void SendReceipt(GameCommand gameCommand)
+        {
+            Send(gameCommand.CommandId.ToString());
         }
 
         protected void webSocketClient_Opened(object sender, EventArgs e)

@@ -4,6 +4,7 @@ using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using FrameLayout = Android.Widget.FrameLayout;
 using Xamarin.Essentials;
+using Java.Lang;
 
 namespace TTT.Client
 {
@@ -22,8 +23,13 @@ namespace TTT.Client
             //OnSaveInstanceState(null);
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-            
-            
+            var thread1 = Thread.CurrentThread();
+
+            RunOnUiThread(() =>
+            {
+                var thread1 = Thread.CurrentThread();
+                var threadClass = thread1.Class;
+            });
 
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
             

@@ -1,3 +1,4 @@
+[Common] Extend <CommandManager> to allow for message timeouts, unexpected socket closure, etc.
 [Client] Create APK
 [Client] Investigate Garbage Collection - check for Memory Leaks in ActivityManager implementation
 [Client] Add Toolbar/InGameMenu to GameViewModel
@@ -61,3 +62,5 @@ COMPLETE
 [Client] Primary lifecycle of application should be based on "Scenes" (Activities)
 [Client] Add "Connected" message when websocket successfully connects
 [Client] Add (Connect) "Look for games" function
+[Client] Add CommandHandle => Send a Message Receipt to [Host]
+[Host] Keep sending message until received

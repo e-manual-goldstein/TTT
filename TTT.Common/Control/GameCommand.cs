@@ -13,15 +13,18 @@ namespace TTT.Common
 
         }
 
-        public GameCommand(ISubCommand subCommand)
+        public GameCommand(ISubCommand subCommand, Guid commandId)
         {
             CommandType = subCommand.GetType();
+            CommandId = commandId;
             SubCommandString = JsonConvert.SerializeObject(subCommand);
         }
 
         public Type CommandType { get; set; }
 
         public string SubCommandString { get; set; }
+
+        public Guid CommandId { get; set; }
         
         public ISubCommand SubCommand()
         {

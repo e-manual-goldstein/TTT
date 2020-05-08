@@ -23,13 +23,13 @@ namespace TTT.Common
         
         public bool Active { get; set; }
 
-        public void ClickCell(object sender, EventArgs e)
-        {
-            if (Marker == null)
-            {
-                _takeTurnAction(this);
-            }
-        }
+        //public void ClickCell(object sender, EventArgs e)
+        //{
+        //    if (Marker == null)
+        //    {
+        //        _takeTurnAction(this);
+        //    }
+        //}
 
         public override string ToString()
         {
@@ -49,11 +49,11 @@ namespace TTT.Common
             //_updateValueAction(marker);
         }
 
-        Action<Cell> _takeTurnAction;
-        public void SetTakeTurnAction(Action<Cell> action)
-        {
-            _takeTurnAction = action;
-        }
+        //Action<Cell> _takeTurnAction;
+        //public void SetTakeTurnAction(Action<Cell> action)
+        //{
+        //    _takeTurnAction = action;
+        //}
 
         public void SwapTurn()
         {

@@ -27,6 +27,7 @@ namespace TTT.Host
         {
             #region Base Services
             services.AddSingleton<Logger>();
+            services.AddSingleton<CommandManager>();
             services.AddSingleton<MainWindow>();
             services.AddTransient<PortManager>();
             #endregion

@@ -10,6 +10,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Java.Lang;
 using TTT.Common;
 
 namespace TTT.Client
@@ -43,6 +44,7 @@ namespace TTT.Client
 
         private void Connect(object sender, EventArgs e)
         {
+            var thread = Thread.CurrentThread();
             Task.Run(async () => {
                 var ipEndpoint = await _externalHostManager.FindOnlineGame();
                 _socketManager.CreateSocket(ipEndpoint);

@@ -9,18 +9,21 @@ namespace TTT.Client
     public class ActionService
     {
         SocketManager _socketManager;
-
-
-        public ActionService(SocketManager socketManager)
+        CommandManager _commandManager;
+        PlayerManager _playerManager;
+        public ActionService(SocketManager socketManager, CommandManager commandManager, PlayerManager playerManager)
         {
             _socketManager = socketManager;
+            _commandManager = commandManager;
+            _playerManager = playerManager;
         }
 
         public void TakeTurn(Cell cell)
         {
             var hostSocket = _socketManager.HostSocket;
-            var turnCommand = new TurnCommand(hostSocket.ClientId, cell);
-            hostSocket.Send(new GameCommand(turnCommand));
+            var turnCommand = new TurnCommand(_playerManager.GetPlayerId(), cell);
+            var gameCommand = _commandManager.CreateCommand(turnCommand);
+            _commandManager.SendVerify(hostSocket, gameCommand);
         }
     }
 }

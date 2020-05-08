@@ -17,14 +17,16 @@ namespace TTT.Host
         ISocketHub _socketHub;
         ViewManager _viewManager;
         ExternalConnectionManager _externalConnectionManager;
+        CommandManager _commandManager;
 
-        public MainMenu(GameManager gameManager, ISocketHub socketHub, ViewManager viewManager, ExternalConnectionManager externalConnectionManager)
+        public MainMenu(GameManager gameManager, ISocketHub socketHub, ViewManager viewManager, ExternalConnectionManager externalConnectionManager, CommandManager commandManager)
         {
             _menuActions = new Dictionary<string, Action>();
             _gameManager = gameManager;
             _socketHub = socketHub;
             _viewManager = viewManager;
             _externalConnectionManager = externalConnectionManager;
+            _commandManager = commandManager;
         }
 
         public void CreateActions()
@@ -60,7 +62,7 @@ namespace TTT.Host
                     _socketHub.BeginListening().ContinueWith(task =>
                     {
                         var playerId = task.Result;
-                        var gameCommand = new GameCommand(new AssignPlayerCommand() { PlayerId = playerId });
+                        var gameCommand = _commandManager.CreateCommand(new AssignPlayerCommand() { PlayerId = playerId });
                         _socketHub.SendCommand(playerId, gameCommand);
                         game.AddPlayerToGame(task.Result);
                     })
@@ -72,11 +74,11 @@ namespace TTT.Host
         public void Start()
         {
             var game = _gameManager.CurrentGame();
-            game.StartRandomPlayer();
-            //game.StartAtEndGame();
+            //game.StartRandomPlayer();
+            game.StartAtEndGame();
             var gameState = game.GetCurrentState();
             var subCommand = new UpdateStateCommand(gameState, true);
-            _socketHub.BroadcastCommand(new GameCommand(subCommand));
+            _socketHub.BroadcastCommand(_commandManager.CreateCommand(subCommand));
             _gameManager.StartGame();
             
         }

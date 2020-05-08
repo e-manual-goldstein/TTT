@@ -12,14 +12,16 @@ namespace TTT.Client
     {
         Logger _logger;
         ControllerManager _controllerManager;
+        CommandManager _commandManager;
 
         HostSocket _hostSocket;
         public HostSocket HostSocket => _hostSocket;
 
-        public SocketManager(Logger logger, ControllerManager controllerManager)
+        public SocketManager(Logger logger, ControllerManager controllerManager, CommandManager commandManager)
         {
             _logger = logger;
             _controllerManager = controllerManager;
+            _commandManager = commandManager;
         }
 
         public async Task<Guid> Listen()
@@ -34,7 +36,7 @@ namespace TTT.Client
                         var message = UdpMessage.FromByteArray(task.Result.Buffer);
                         if (Guid.TryParse(message.Payload, out clientId))
                         {
-                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, clientId, true);
+                            _hostSocket = new HostSocket(task.Result.RemoteEndPoint.Address, true);
                             AttachHandlers();
                         }
                     });
@@ -45,8 +47,17 @@ namespace TTT.Client
 
         protected void processMessage(object sender, MessageReceivedEventArgs eventArgs)
         {
-            if (GameCommand.TryParse(eventArgs.Message, out var gameCommand))
-                _controllerManager.ExecuteCommand(gameCommand);
+            if (Guid.TryParse(eventArgs.Message, out var receiptId))
+                _commandManager.LogReceipt(receiptId);
+            else if (GameCommand.TryParse(eventArgs.Message, out var gameCommand))
+            {
+                if (!_commandManager.IsProcessed(gameCommand))
+                {
+                    _controllerManager.ExecuteCommand(gameCommand);
+                    _commandManager.LogReceipt(gameCommand.CommandId);
+                }
+                _hostSocket.SendReceipt(gameCommand);
+            }
             else
                 _logger.Log(eventArgs.Message);
         }
@@ -54,7 +65,7 @@ namespace TTT.Client
 
         internal void CreateSocket(IPEndPoint ipEndpoint)
         {
-            _hostSocket = new HostSocket(ipEndpoint.Address, Guid.NewGuid(), true);
+            _hostSocket = new HostSocket(ipEndpoint.Address,  true);
             AttachHandlers();
         }
 
