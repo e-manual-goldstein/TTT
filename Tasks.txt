@@ -1,10 +1,11 @@
+[Host] Add navigation buttons to <GameView>
 [Common] Extend <CommandManager> to allow for message timeouts, unexpected socket closure, etc.
 [Client] Create APK
 [Client] Investigate Garbage Collection - check for Memory Leaks in ActivityManager implementation
 [Client] Add Toolbar/InGameMenu to GameViewModel
 [Client] Add Persisted Logs
+[Relay] Make use of Expiry Tokens. Don't create new entries for duplicate IP addresses
 [Relay] Encrypt IP Addresses
-[Host] Add navigation buttons to <GameView>
 [Relay] <Client>
 [Relay] Add PortNo to <Host>
 [Relay] Convert to WebApi
@@ -16,8 +17,16 @@
 		
 [Host] Game should auto-start when two clients connected
 
+----------------------Technical Debt-----------------------------------------------
+
+[Host] Clean up <ViewManager> -> Consider Reuse of [Client].<ViewModelManager>
+
+-----------------------------------------------------------------------------------
+
 --------------------NOT MVP--------------------------------------------------------
+
 [Host] <SocketHub> OpenConnection could/should use ReadAsync instead
+
 -----------------------------------------------------------------------------------
 
 

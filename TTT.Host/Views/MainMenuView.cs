@@ -11,7 +11,7 @@ namespace TTT.Host
         MainMenu _model;
         private List<Button> _buttons = new List<Button>();
 
-        public MainMenuView(MainMenu mainMenu)
+        public MainMenuView(MainMenu mainMenu, IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _model = mainMenu;
             Content = new Canvas();

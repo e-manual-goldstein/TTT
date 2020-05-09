@@ -18,8 +18,10 @@ namespace TTT.Host
             _mainWindow = mainWindow;
         }
 
+
         public void SetContent(View view)
         {
+            //Dispose old view;
             _currentView = view;
             _mainWindow.Content = view.Content;
             _mainWindow.SizeChanged += (object sender, SizeChangedEventArgs eventArgs) =>

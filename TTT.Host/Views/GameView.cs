@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using TTT.Common;
 
@@ -12,7 +13,7 @@ namespace TTT.Host
     {
         Game _model;
 
-        public GameView(Game game)
+        public GameView(Game game, IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _model = game;
             Content = new Canvas();
@@ -21,6 +22,27 @@ namespace TTT.Host
         public override void Show()
         {
             DrawCells(_model.GameCells);
+            AddResetButton();
+        }
+
+        private void AddResetButton()
+        {
+            var resetButton = new Button();
+            resetButton.Height = 20;
+            resetButton.Width = 80;
+            resetButton.Content = "Reset";
+            Canvas.SetTop(resetButton, 50);
+            Canvas.SetLeft(resetButton, 500);
+            resetButton.Click += (object sender, RoutedEventArgs eventArgs) =>
+            {
+                GetService<GameManager>().CreateNewGame();
+                var menu = GetService<MainMenu>();
+                menu.CreateActions();
+                var menuView = new MainMenuView(menu, _serviceProvider);
+                GetService<ViewManager>().SetContent(menuView);
+                menuView.Show();
+            };
+            Content.Children.Add(resetButton);
         }
 
         public override void SizeChanged(Size newSize)

@@ -11,6 +11,7 @@ using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using TTT.Common;
+using Xamarin.Forms.Platform.Android;
 
 namespace TTT.Client
 {
@@ -104,15 +105,24 @@ namespace TTT.Client
         public void LoadViewForActivity(Activity activity)
         {
             var view = LoadViewForActivityType(activity.GetType());
-            
+            _logger.Debug($"Loaded View for Activity: {activity.LocalClassName}");
+            _logger.Debug($"Setting Content View: {view.ContentDescription}");
             activity.SetContentView(view);
+
             SetCurrentView(view);
             SetCurrentActivity(activity);
-            ViewUpdated += (View newView) =>
+            ViewUpdatedAction = (View newView) =>
             {
-                //Remove View?
-                activity.RunOnUiThread(() => activity.SetContentView(newView));
-                view.Dispose();
+                _logger.Debug($"Firing ViewUpdated Event");
+                activity.RunOnUiThread(() =>
+                {
+                    _logger.Debug($"Running on UI Thread");
+                    _logger.Debug($"Removing View {newView}");
+                    newView.RemoveFromParent();
+                    _logger.Debug($"Setting Content View for Activity: {activity.LocalClassName}");
+                    activity.SetContentView(newView);
+                    view.Dispose();
+                });
             };
         }
 
@@ -120,13 +130,14 @@ namespace TTT.Client
         {
             if (!typeof(Activity).IsAssignableFrom(activityType))
                 throw new ArgumentException("Cannot load view for non-Activity types");
+            _logger.Debug($"Loading View for Activity Type: {activityType.Name}");
             return _activityLookup[activityType];
         }
 
         public void LoadNewView(Type activityType)
         {
             ValidateActivityType(activityType);
-            ViewUpdated.Invoke(_activityLookup[activityType]);
+            ViewUpdatedAction(_activityLookup[activityType]);
         }
 
         private void SetCurrentActivity(Activity activity)
@@ -143,9 +154,7 @@ namespace TTT.Client
 
         #region View Updated Event
 
-        private delegate void ViewUpdatedEvent(View view);
-
-        private event ViewUpdatedEvent ViewUpdated;
+        private Action<View> ViewUpdatedAction;
 
         #endregion
 
