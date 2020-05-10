@@ -23,37 +23,16 @@ namespace TTT.Common
         
         public bool Active { get; set; }
 
-        //public void ClickCell(object sender, EventArgs e)
-        //{
-        //    if (Marker == null)
-        //    {
-        //        _takeTurnAction(this);
-        //    }
-        //}
-
         public override string ToString()
         {
             return $"{I}, {J}";
         }
-
-
-        //Action<Marker> _updateValueAction;
-        //public void SetUpdateValueAction(Action<Marker> action)
-        //{
-        //    _updateValueAction = action;
-        //}
 
         public void UpdateValue(Marker marker)
         {
             Marker = marker;
             //_updateValueAction(marker);
         }
-
-        //Action<Cell> _takeTurnAction;
-        //public void SetTakeTurnAction(Action<Cell> action)
-        //{
-        //    _takeTurnAction = action;
-        //}
 
         public void SwapTurn()
         {

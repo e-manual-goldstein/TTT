@@ -11,30 +11,24 @@ namespace TTT.Client
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MenuActivity : AppCompatActivity
     {
-        
+
         public MenuActivity()
         {
-            
+
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            
-            //OnSaveInstanceState(null);
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-            var thread1 = Thread.CurrentThread();
-
-            RunOnUiThread(() =>
-            {
-                var thread1 = Thread.CurrentThread();
-                var threadClass = thread1.Class;
-            });
 
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
-            
+
             SetSupportActionBar(toolbar);
         }
+
+        
     }
 }
+
 

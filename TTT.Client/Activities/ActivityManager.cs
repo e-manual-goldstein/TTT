@@ -113,13 +113,9 @@ namespace TTT.Client
             SetCurrentActivity(activity);
             ViewUpdatedAction = (View newView) =>
             {
-                _logger.Debug($"Firing ViewUpdated Event");
                 activity.RunOnUiThread(() =>
                 {
-                    _logger.Debug($"Running on UI Thread");
-                    _logger.Debug($"Removing View {newView}");
-                    newView.RemoveFromParent();
-                    _logger.Debug($"Setting Content View for Activity: {activity.LocalClassName}");
+                    view.RemoveFromParent();
                     activity.SetContentView(newView);
                     view.Dispose();
                 });

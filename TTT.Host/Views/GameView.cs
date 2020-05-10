@@ -108,15 +108,5 @@ namespace TTT.Host
             //cell.SetUpdateValueAction((newValue) => UpdateCellValue(label, newValue, () => cell.Active));
             return label;
         }
-
-        //private void UpdateCellValue(Label label, Marker newValue, Func<bool> active)
-        //{
-        //    App.Current.Dispatcher.Invoke(() =>
-        //    {
-        //        label.Content = newValue.ToString();
-        //        if (active())
-        //            label.Background = new SolidColorBrush(Colors.Tomato);
-        //    });
-        //}
     }
 }

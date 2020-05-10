@@ -30,11 +30,12 @@ namespace TTT.Client
             using (var client = new HttpClient())
             {
                 return await client.GetStringAsync("http://www.goldstein.somee.com/client/connect")
-                .ContinueWith(task => 
-                {
-                    _logger.Debug("Found game");
-                    return ParseIPEndPoint(task.Result);
-                });
+                    .ContinueWith(task => 
+                    {
+                        var endPoint = ParseIPEndPoint(task.Result);
+                        _logger.Debug("Found game");
+                        return endPoint;
+                    });
             }
         }
 
@@ -42,7 +43,9 @@ namespace TTT.Client
         {
             var match = Regex.Match(result, @"ADDRESS:\[(?'IpAddress'.*?)\]##");
             _logger.Debug($"Host Address: {match.Groups["IpAddress"].Value}");
-            return new IPEndPoint(IPAddress.Parse(match.Groups["IpAddress"].Value), 58008);
+            return IPAddress.TryParse(match.Groups["IpAddress"].Value, out var iPAddress)
+                ? new IPEndPoint(iPAddress, 58008) 
+                : null;
         }
     }
 }

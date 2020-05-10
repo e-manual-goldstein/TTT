@@ -47,7 +47,8 @@ namespace TTT.Client
             var thread = Thread.CurrentThread();
             Task.Run(async () => {
                 var ipEndpoint = await _externalHostManager.FindOnlineGame();
-                _socketManager.CreateSocket(ipEndpoint);
+                if (ipEndpoint != null)
+                    _socketManager.CreateSocket(ipEndpoint);
             });
         }
 

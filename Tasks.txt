@@ -1,3 +1,7 @@
+[Client] Store host address in Activity.OnSaveInstanceState
+	[Host] <SocketHub> Add receiver configured to accept reconnection attempts
+		[Client] If game is in progress and no connection available, attempt to reconnect
+		
 [Host] Add navigation buttons to <GameView>
 [Common] Extend <CommandManager> to allow for message timeouts, unexpected socket closure, etc.
 [Client] Create APK
@@ -11,9 +15,6 @@
 [Relay] Convert to WebApi
 	[Client] Remove "usesCleartextTraffic" option
 
-[Client] Store host address in Activity.OnSaveInstanceState
-	[Host] <SocketHub> Add receiver configured to accept reconnection attempts
-		[Client] If game is in progress and no connection available, attempt to reconnect
 		
 [Host] Game should auto-start when two clients connected
 

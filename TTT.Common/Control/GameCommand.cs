@@ -33,22 +33,17 @@ namespace TTT.Common
 
         public static bool TryParse(string message, out GameCommand gameCommand)
         {
-            gameCommand = JsonConvert.DeserializeObject<GameCommand>(message, 
-                new JsonSerializerSettings() 
-                { 
-                    Error = (object sender, ErrorEventArgs eventArgs) => 
-                    { 
-                        //Fail silently
-                        eventArgs.ErrorContext.Handled = true; 
-                    } 
-                });
+            gameCommand = JsonConvert.DeserializeObject<GameCommand>
+                (message, new JsonSerializerSettings()
+                    {
+                        Error = (object sender, ErrorEventArgs eventArgs) =>
+                        {
+                            //Fail silently
+                            eventArgs.ErrorContext.Handled = true;
+                        }
+                    }
+                );
             return gameCommand != null;
-        }
-
-        private static void ErrorHandler(object sender, ErrorEventArgs eventArgs)
-        {
-            
-            //_logger.Warning($"{eventArgs.ErrorContext.Error.Message}");
         }
     }
 }

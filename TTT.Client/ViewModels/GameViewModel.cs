@@ -46,21 +46,27 @@ namespace TTT.Client
             var baseLayout = new LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
             var baseX = (DisplayMetrics.WidthPixels - (3 * Constants.CellSizeClient)) / 2;
             var baseY = (DisplayMetrics.HeightPixels - (3 * Constants.CellSizeClient)) / 2;
+            var backsquare = new FrameLayout(context);
+            backsquare.SetBackgroundColor(Color.Gray);
+            backsquare.LayoutParameters = new LayoutParams(6 + (Constants.CellSizeClient * 3), 6 + (Constants.CellSizeClient * 3));
+            backsquare.SetX(baseX);
+            backsquare.SetY(baseY);
+            layout.AddView(backsquare, 0);
             foreach (var cell in Model.Cells)
             {
                 var button = new Button(context);
                 button.LayoutParameters = baseLayout;
-                var x = baseX + (cell.I * Constants.CellSizeClient);
-                var y = baseY + (cell.J * Constants.CellSizeClient);
+                var x = baseX + (cell.I * (Constants.CellSizeClient + 3));
+                var y = baseY + (cell.J * (Constants.CellSizeClient + 3));
                 button.SetX(x);
                 button.SetY(y);
-                button.SetBackgroundColor(GetCellFromState(cell, gameState).Active ? Color.Red : Color.Gray);
+                button.SetBackgroundColor(GetCellFromState(cell, gameState).Active ? Color.Red : Color.White);
                 button.SetTextColor(Color.White);
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
                 button.Text = gameState == null ? null : GetCellFromState(cell, gameState).Marker.ToString();
                 if (GetService<PlayerManager>().IsMyTurn(gameState))
                     button.Click += (object sender, EventArgs eventArgs) => ClickCell(cell);
-                layout.AddView(button);
+                layout.AddView(button, 1);
             }
         }
 
