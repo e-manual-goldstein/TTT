@@ -14,7 +14,7 @@ using TTT.Common;
 
 namespace TTT.Client
 {
-    public class MainMenuViewModel : ViewModel<MainMenu>
+    public class MainMenuViewModel : VMWithToolbar<MainMenu>
     {
         public MainMenuViewModel(MainMenu mainMenu) : base(mainMenu)
         {
@@ -23,12 +23,15 @@ namespace TTT.Client
 
         protected override void Draw()
         {
-            AddButtons(Model.CreateActionDictionary());
+            var context = ActivityManager.CurrentContext();
+            var layout = new FrameLayout(context);
+            layout.AddView(AddButtons(context, Model.CreateActionDictionary()), 0);
+            layout.AddView(DrawToolbar(context),1);
+            ActivityManager.SetActivityView(typeof(MenuActivity), layout);
         }
 
-        private void AddButtons(IDictionary<string, EventHandler> callbackDictionary)
+        private FrameLayout AddButtons(Context context, IDictionary<string, EventHandler> callbackDictionary)
         {
-            var context = ActivityManager.CurrentContext();
             var width = DisplayMetrics.WidthPixels;
             var height = DisplayMetrics.HeightPixels;
             var baseLayout = new FrameLayout.LayoutParams(Constants.CellSizeClient, Constants.CellSizeClient);
@@ -47,10 +50,10 @@ namespace TTT.Client
                 button.SetTextSize(Android.Util.ComplexUnitType.Px, 50);
                 button.Text = item.Key;
                 button.Click += item.Value;
-                frameLayout.AddView(button);
+                frameLayout.AddView(button, 0);
                 n++;
             }
-            ActivityManager.SetActivityView(typeof(MenuActivity), frameLayout);
+            return frameLayout;
         }
 
     }

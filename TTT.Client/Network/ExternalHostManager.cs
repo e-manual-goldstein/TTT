@@ -27,11 +27,13 @@ namespace TTT.Client
 
         public async Task<IPEndPoint> FindOnlineGame()
         {
+            _logger.Debug("Finding online game...");
             using (var client = new HttpClient())
             {
-                return await client.GetStringAsync("http://www.goldstein.somee.com/client/connect")
-                    .ContinueWith(task => 
+                var httpTask = client.GetStringAsync("http://www.goldstein.somee.com/client/connect");
+                return await httpTask.ContinueWith(task => 
                     {
+                        _logger.Debug("Parsing results");
                         var endPoint = ParseIPEndPoint(task.Result);
                         _logger.Debug("Found game");
                         return endPoint;
@@ -45,6 +47,14 @@ namespace TTT.Client
             _logger.Debug($"Host Address: {match.Groups["IpAddress"].Value}");
             return IPAddress.TryParse(match.Groups["IpAddress"].Value, out var iPAddress)
                 ? new IPEndPoint(iPAddress, 58008) 
+                : null;
+        }
+
+        public IPEndPoint ForceIPEndPoint()
+        {
+            _logger.Debug("Forcing IP Address");
+            return IPAddress.TryParse("99.238.159.30", out var iPAddress)
+                ? new IPEndPoint(iPAddress, 58008)
                 : null;
         }
     }

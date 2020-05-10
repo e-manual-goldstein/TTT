@@ -9,5 +9,6 @@ namespace TTT.Common
         public const int SERVER_LISTEN_PORT = 58008;
         public static int CellSizeClient = 250;
         public static int CellSizeHost = 80;
+        public static int ClientToolbarExtentedSize = 1200;
     }
 }

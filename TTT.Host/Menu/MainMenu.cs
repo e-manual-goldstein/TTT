@@ -53,12 +53,13 @@ namespace TTT.Host
 
         public async Task ConnectRemote()
         {
-            _gameManager.CreateNewGame();
+            if (_gameManager.CurrentGame() == null)
+                _gameManager.CreateNewGame();
             await Task.Run(() =>
             {
                 var game = _gameManager.CurrentGame();
                 Task.WaitAll(
-                    _externalConnectionManager.OpenExternalSocket(Guid.NewGuid()),
+                    _externalConnectionManager.EnsureExternalSocketOpen(Guid.NewGuid()),
                     _socketHub.BeginListening().ContinueWith(task =>
                     {
                         var playerId = task.Result;
@@ -74,8 +75,8 @@ namespace TTT.Host
         public void Start()
         {
             var game = _gameManager.CurrentGame();
-            //game.StartRandomPlayer();
-            game.StartAtEndGame();
+            game.StartRandomPlayer();
+            //game.StartAtEndGame();
             var gameState = game.GetCurrentState();
             var subCommand = new UpdateStateCommand(gameState, true);
             _socketHub.BroadcastCommand(_commandManager.CreateCommand(subCommand));

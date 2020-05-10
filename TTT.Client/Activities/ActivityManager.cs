@@ -117,6 +117,7 @@ namespace TTT.Client
                 {
                     view.RemoveFromParent();
                     activity.SetContentView(newView);
+                    SetCurrentView(newView);
                     view.Dispose();
                 });
             };

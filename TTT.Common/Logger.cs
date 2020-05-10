@@ -13,9 +13,9 @@ namespace TTT.Common
 
         public Logger()
         {
-#if DEBUG
+
             _verbosity = Verbosity.Debug;
-#endif
+
         }
 
         public void Log(string message)
@@ -23,7 +23,18 @@ namespace TTT.Common
             Console.WriteLine(message);
             LogInMemory(message);
             if (MessageReceived != null)
-                MessageReceived(message);
+            {
+                try
+                {
+                    MessageReceived(message);
+                }
+                catch (Exception ex)
+                {
+                    LogInMemory("Error exeucting Message Received handler");
+                    LogInMemory(ex.Message);
+                    LogInMemory(ex.StackTrace);
+                }
+            }
         }
 
         public void Debug(string message)

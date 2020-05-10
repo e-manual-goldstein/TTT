@@ -44,8 +44,9 @@ namespace TTT.Client
 
         private void Connect(object sender, EventArgs e)
         {
-            var thread = Thread.CurrentThread();
+            _logger.Debug("Starting Connect");
             Task.Run(async () => {
+                _logger.Debug("Connecting");
                 var ipEndpoint = await _externalHostManager.FindOnlineGame();
                 if (ipEndpoint != null)
                     _socketManager.CreateSocket(ipEndpoint);

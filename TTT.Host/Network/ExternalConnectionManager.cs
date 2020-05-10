@@ -13,6 +13,7 @@ namespace TTT.Host
         PortManager _portManager;
         ISocketHub _socketHub;
         Logger _logger;
+        bool _isOpened;
 
         public ExternalConnectionManager(PortManager portManager, ISocketHub socketHub, Logger logger)
         {
@@ -21,12 +22,19 @@ namespace TTT.Host
             _logger = logger;
         }
 
-        public async Task OpenExternalSocket(Guid portId)
+        public async Task EnsureExternalSocketOpen(Guid portId)
+        {
+            if (!_isOpened)
+                await OpenExternalSocket(portId);
+        }
+
+        private async Task OpenExternalSocket(Guid portId)
         {
             _logger.Debug("Opening External Socket");
             _portManager.EnsurePortIsForwarded(new PortForwardSettings(58008, _socketHub.ServerPort, PortType.TCP, _socketHub.ServerAddress.ToString(), portId.ToString()));
             _logger.Debug("Publishing socket information to webhost");
             await PublishHostSocket();
+            _isOpened = true;
         }
 
         private async Task PublishHostSocket()

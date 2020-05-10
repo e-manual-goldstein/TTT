@@ -18,7 +18,7 @@ using TTT.Common;
 
 namespace TTT.Client
 {
-    [Application(Name = "com.companyname.ttt.client.App", Theme = "@style/AppTheme.NoActionBar")]
+    [Application(Name = "com.companyname.ttt.client.App", Theme = "@style/AppTheme.NoActionBar", UsesCleartextTraffic = true)]
     public class App : Application, Application.IActivityLifecycleCallbacks
     {
         #region Service Provider
